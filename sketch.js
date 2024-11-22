@@ -84,7 +84,7 @@ function draw() {
   
   // Draw score
   textFont(historyFont);
-  textSize(96);  // Doubled size
+  textSize(200);  // Doubled size
   textAlign(LEFT, TOP);
   fill(0);
   text(score, 20, 20);  // Just the number
