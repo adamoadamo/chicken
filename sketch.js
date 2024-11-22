@@ -136,14 +136,13 @@ function drawDuck(x, y) {
   rect(x - (25 * duckSize), y - (50 * duckSize), 50 * duckSize, 50 * duckSize); // Main body
 
   // Original wings
-  rect(x - (38 * duckSize), y - (38 * duckSize), 25 * duckSize, 25 * duckSize); // Left wing
-  rect(x + (12 * duckSize), y - (38 * duckSize), 25 * duckSize, 25 * duckSize); // Right wing
+  rect(x - (37.5 * duckSize), y - (37.5 * duckSize), 25 * duckSize, 25 * duckSize); // Left wing
+  rect(x + (12.5 * duckSize), y - (37.5 * duckSize), 25 * duckSize, 25 * duckSize); // Right wing
 
   // Only draw floating wing pixels when jumping
   if (isJumping) {
-    // Floating wing pixels
-    rect(x - (50.5 * duckSize), y - (38 * duckSize) + wingPixelOffset, 12.5 * duckSize, 12.5 * duckSize); // Left floating pixel
-    rect(x + (37 * duckSize), y - (38 * duckSize) + wingPixelOffset, 12.5 * duckSize, 12.5 * duckSize); // Right floating pixel
+    rect(x - (50 * duckSize), y - (37.5 * duckSize) + wingPixelOffset, 12.5 * duckSize, 12.5 * duckSize); // Left floating pixel
+    rect(x + (37.5 * duckSize), y - (37.5 * duckSize) + wingPixelOffset, 12.5 * duckSize, 12.5 * duckSize); // Right floating pixel
   }
 
   // Head (scaled with size)
@@ -153,31 +152,27 @@ function drawDuck(x, y) {
   if (turnDirection <= 0) {  // Looking left or center
     // Beak first
     fill(beakColor);
-    rect(x - (12.5 * duckSize), y - (67.5 * duckSize), 12.5 * duckSize, 7.5 * duckSize);
+    rect(x - (12.5 * duckSize), y - (75 * duckSize), 12.5 * duckSize, 12.5 * duckSize);
     // Eye to the right of beak
     fill(0);
     if (eyeOpen) {
-      rect(x + (2.5 * duckSize), y - (67.5 * duckSize), 5 * duckSize, 5 * duckSize);
-    } else {
-      rect(x + (2.5 * duckSize), y - (62.5 * duckSize), 5 * duckSize, 2.5 * duckSize);
+      rect(x, y - (75 * duckSize), 12.5 * duckSize, 12.5 * duckSize);
     }
   } else {  // Looking right
     // Beak first
     fill(beakColor);
-    rect(x, y - (67.5 * duckSize), 12.5 * duckSize, 7.5 * duckSize);
+    rect(x, y - (75 * duckSize), 12.5 * duckSize, 12.5 * duckSize);
     // Eye to the left of beak
     fill(0);
     if (eyeOpen) {
-      rect(x - (7.5 * duckSize), y - (67.5 * duckSize), 5 * duckSize, 5 * duckSize);
-    } else {
-      rect(x - (7.5 * duckSize), y - (62.5 * duckSize), 5 * duckSize, 2.5 * duckSize);
+      rect(x - (12.5 * duckSize), y - (75 * duckSize), 12.5 * duckSize, 12.5 * duckSize);
     }
   }
 
-  // Legs (unchanged size)
+  // Legs (scaled with size)
   fill(0);
-  rect(x - 17.5, y, 7.5, 12.5);
-  rect(x + 10, y, 7.5, 12.5);
+  rect(x - (18.75 * duckSize), y, 12.5 * duckSize, 12.5 * duckSize);
+  rect(x + (6.25 * duckSize), y, 12.5 * duckSize, 12.5 * duckSize);
 }
 
 function drawApple(x, y) {
