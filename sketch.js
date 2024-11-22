@@ -157,9 +157,9 @@ function drawDuck(x, y) {
     // Eye to the right of beak
     fill(0);
     if (eyeOpen) {
-      rect(x + (2.5 * duckSize), y - (67.5 * duckSize), 5 * duckSize, 5 * duckSize);
+      rect(x + (2.5 * duckSize), y - (67.5 * duckSize), 6.25 * duckSize, 6.25 * duckSize);
     } else {
-      rect(x + (2.5 * duckSize), y - (62.5 * duckSize), 5 * duckSize, 2.5 * duckSize);
+      rect(x + (2.5 * duckSize), y - (62.5 * duckSize), 6.25 * duckSize, 2.5 * duckSize);
     }
   } else {  // Looking right
     // Beak first
