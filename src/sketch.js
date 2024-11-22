@@ -30,39 +30,7 @@ let friction = 0.9;
 let maxSpeed = 12;
 let apples = [{x: 400, y: 400}]; // Start with one apple
 let maxApples = 1;               // Will increase as score goes up
-let grassBlades = [];
-let windAngle = 0;
-let windSpeed = 0.01;
-let grassHeight = 25; // Half of duck height (50)
-let grassColors = ['#2E8B57'];
 let pigeon;
-
-class GrassBlade {
-  constructor(x, y) {
-    this.x = x;
-    this.y = y;
-    this.height = random(20, 30);
-    this.width = 6.25;
-    this.angle = random(-0.1, 0.1);
-  }
-
-  draw() {
-    push();
-    translate(this.x, this.y);
-    rotate(this.angle + sin(windAngle) * 0.1);
-    fill(random(grassColors));
-    rect(0, 0, this.width, -this.height);
-    pop();
-  }
-
-  isInFrontOfDuck(duckX, duckY) {
-    return this.y > duckY - 25;
-  }
-
-  isInFrontOfApple(appleX, appleY) {
-    return this.y > appleY - 25;
-  }
-}
 
 function preload() {
   try {
@@ -89,15 +57,6 @@ function setup() {
   // Set random position for apple
   appleX = random(100, width - 100);
   appleY = random(100, height - 100);
-
-  // Initialize grass blades
-  for (let y = 0; y < height; y += 50) {
-    for (let x = 0; x < width + 6.25; x += 37.5) {
-      if (random() < 0.35) {
-        grassBlades.push(new GrassBlade(x, y));
-      }
-    }
-  }
 }
 
 function draw() {
@@ -139,44 +98,14 @@ function draw() {
   // Check for apple collection
   checkCollision();
 
-  // Draw ALL grass first
-  windAngle += windSpeed;
-  grassBlades.forEach(blade => {
-    if (!blade.isInFrontOfDuck(duckX, duckY)) {
-      blade.draw();
-    }
-  });
-
   // Draw game elements
   apples.forEach(apple => {
     drawAppleShadow(apple.x, apple.y);
-    
-    // Draw background grass for this apple
-    grassBlades.forEach(blade => {
-      if (!blade.isInFrontOfApple(apple.x, apple.y) && !blade.isInFrontOfDuck(duckX, duckY)) {
-        blade.draw();
-      }
-    });
-    
     drawApple(apple.x, apple.y);
-    
-    // Draw foreground grass for this apple
-    grassBlades.forEach(blade => {
-      if (blade.isInFrontOfApple(apple.x, apple.y)) {
-        blade.draw();
-      }
-    });
   });
   
   drawShadow(duckX, duckY, duckSize);
   drawDuck(duckX, duckY + jumpHeight);
-  
-  // Draw foreground grass for duck
-  grassBlades.forEach(blade => {
-    if (blade.isInFrontOfDuck(duckX, duckY)) {
-      blade.draw();
-    }
-  });
 
   // Handle pigeon
   pigeon.update(window, duckX, duckY, score);
