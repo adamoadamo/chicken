@@ -7,12 +7,12 @@ let turnInterval; // Random interval for head turning
 let turnDirection = 0; // Direction of the head (left/right/neutral)
 let blinkTimer = 0; // Timer for blinking
 let blinkInterval; // Random interval for blinking
-let chickenX = 300; // Chicken's X position
-let chickenY = 300; // Chicken's Y position
-let moveSpeed = 5;  // Movement speed
+let chickenX = 400; // Center of 800x800 canvas
+let chickenY = 400; // Center of 800x800 canvas
+let moveSpeed = 6;  // Slightly faster movement speed
 
 function setup() {
-  createCanvas(600, 600);
+  createCanvas(800, 800);
   noSmooth();
   noStroke();
   frameRate(30);
@@ -65,32 +65,37 @@ function draw() {
 function drawChicken(x, y) {
   fill(chickenColor);
 
-  // Body
-  rect(x - 10, y - 20, 20, 20); // Main body
-  rect(x - 15, y - 15, 10, 10); // Left wing
-  rect(x + 5, y - 15, 10, 10); // Right wing
+  // Body (25% larger)
+  rect(x - 12.5, y - 25, 25, 25); // Main body
+  rect(x - 19, y - 19, 12.5, 12.5); // Left wing
+  rect(x + 6, y - 19, 12.5, 12.5); // Right wing
 
-  // Head (now properly attached to body)
+  // Head
   push();
-  translate(x, y - 20); // Move to top of body
+  translate(x, y - 25); // Move to top of body
   rotate(radians(headTurnAngle));
-  rect(-5, -10, 10, 10); // Head
+  rect(-6.25, -12.5, 12.5, 12.5); // Head
 
   // Eye
   fill(0);
   if (eyeOpen) {
-    rect(-3, -7, 2, 2);
+    rect(-3.75, -8.75, 2.5, 2.5);
   } else {
-    rect(-3, -5, 2, 1);
+    rect(-3.75, -6.25, 2.5, 1.25);
   }
 
   // Beak
   fill(beakColor);
-  rect(0, -7, 5, 3);
+  rect(0, -8.75, 6.25, 3.75);
   pop();
 
   // Legs
   fill(0);
-  rect(x - 7, y, 3, 5);
-  rect(x + 4, y, 3, 5);
+  rect(x - 8.75, y, 3.75, 6.25);
+  rect(x + 5, y, 3.75, 6.25);
+}
+
+function keyPressed() {
+  // This empty function ensures p5.js is listening for keyboard events
+  return false; // Prevents default browser behaviors
 }
