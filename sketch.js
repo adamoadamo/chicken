@@ -145,14 +145,14 @@ function drawDuck(x, y) {
     rect(x - (12.5 * duckSize), y - (62.5 * duckSize), 12.5 * duckSize, 6.25 * duckSize);
     // Eye to the right of beak
     fill(0);
-    rect(x, y - (62.5 * duckSize), 6.25 * duckSize, 6.25 * duckSize);
+    rect(x, y - (68.75 * duckSize), 6.25 * duckSize, 6.25 * duckSize);
   } else {  // Looking right
     // Beak first
     fill(beakColor);
     rect(x, y - (62.5 * duckSize), 12.5 * duckSize, 6.25 * duckSize);
     // Eye to the left of beak
     fill(0);
-    rect(x - (6.25 * duckSize), y - (62.5 * duckSize), 6.25 * duckSize, 6.25 * duckSize);
+    rect(x - (6.25 * duckSize), y - (68.75 * duckSize), 6.25 * duckSize, 6.25 * duckSize);
   }
 
   // Legs (unchanged size)
