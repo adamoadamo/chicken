@@ -149,8 +149,8 @@ function draw() {
   });
 
   // Handle pigeon
-  pigeon.update(duckX, duckY, score);
-  pigeon.draw();
+  pigeon.update(window, duckX, duckY, score);
+  pigeon.draw(window, drawShadow);
 
   if (pigeon.showDialog) {
     textFont(historyFont);
@@ -300,7 +300,7 @@ class Pigeon {
     this.showDialog = false;
   }
 
-  draw() {
+  draw(window, drawShadow) {
     if (!this.active) return;
     
     drawShadow(this.x, this.y, 1);
@@ -332,7 +332,7 @@ class Pigeon {
     rect(this.x + 6.25, this.y, 6.25, 12.5);
   }
 
-  update(duckX, duckY, score) {
+  update(window, duckX, duckY, score) {
     if (!this.active && score >= 10) {
       this.activate();
     }
