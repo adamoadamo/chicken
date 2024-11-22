@@ -1,4 +1,3 @@
-import DIALOG from './dialog.js';
 let duckColor = '#FFFFFF';
 let duckX = 400;
 let duckY = 400;
@@ -39,9 +38,6 @@ let pigeonY = -50;
 let pigeonActive = false;
 let pigeonSpeed = 3;
 let pigeonDirection = 0; // -1 left, 0 center, 1 right
-let currentDialog = null;
-let dialogTimer = 0;
-let dialogDuration = 90; // 3 seconds at 30 fps
 
 function preload() {
   historyFont = loadFont('m3x6.ttf');
@@ -159,15 +155,6 @@ function draw() {
   textAlign(LEFT, TOP);
   fill(0);
   text(score, 20, -30);
-
-  // Handle dialog display
-  if (currentDialog && dialogTimer > 0) {
-    drawDialog(pigeonX, pigeonY, currentDialog);
-    dialogTimer--;
-    if (dialogTimer <= 0) {
-      currentDialog = null;
-    }
-  }
 }
 
 function drawDuck(x, y) {
@@ -414,20 +401,4 @@ function handlePigeon() {
     drawShadow(pigeonX, pigeonY, 1);
     drawPigeon(pigeonX, pigeonY);
   }
-}
-
-function drawDialog(x, y, text) {
-  push();
-  fill(255);
-  rect(x - 100, y - 60, 200, 40);
-  fill(0);
-  textSize(24);
-  textAlign(CENTER, CENTER);
-  text(text, x, y - 40);
-  pop();
-}
-
-function getRandomDialog(character, category) {
-  const options = DIALOG[character][category];
-  return options[Math.floor(Math.random() * options.length)];
 }
