@@ -61,6 +61,10 @@ function draw() {
     duckX += moveSpeed;
   }
 
+  // Handle jumping and shadow
+  handleJump();
+  drawShadow(duckX, duckY, duckSize);
+
   // Draw the duck at its current position
   drawDuck(duckX, duckY + jumpHeight);
 
