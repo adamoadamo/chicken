@@ -23,6 +23,7 @@ let jumpVelocity = 0;
 let jumpHeight = 0;
 let gravity = 0.5;
 let jumpForce = -12;
+let wingPixelOffset = 0;
 
 function preload() {
   historyFont = loadFont('m3x6.ttf');
@@ -105,8 +106,13 @@ function drawDuck(x, y) {
 
   // Body (scaled with size)
   rect(x - (25 * duckSize), y - (50 * duckSize), 50 * duckSize, 50 * duckSize); // Main body
-  rect(x - (38 * duckSize), y - (38 * duckSize), 25 * duckSize, 25 * duckSize); // Left wing
-  rect(x + (12 * duckSize), y - (38 * duckSize), 25 * duckSize, 25 * duckSize); // Right wing
+
+  // Wings with floating pixel
+  rect(x - (38 * duckSize), y - (38 * duckSize), 12.5 * duckSize, 25 * duckSize); // Left wing base
+  rect(x - (25.5 * duckSize), y - (38 * duckSize) + wingPixelOffset, 12.5 * duckSize, 12.5 * duckSize); // Left wing pixel that moves
+
+  rect(x + (12 * duckSize), y - (38 * duckSize), 12.5 * duckSize, 25 * duckSize); // Right wing base
+  rect(x + (24.5 * duckSize), y - (38 * duckSize) + wingPixelOffset, 12.5 * duckSize, 12.5 * duckSize); // Right wing pixel that moves
 
   // Head (scaled with size)
   rect(x - (12.5 * duckSize), y - (75 * duckSize), 25 * duckSize, 25 * duckSize); // Head
@@ -178,17 +184,20 @@ function handleJump() {
   if (keyIsDown(32) && !isJumping) { // 32 is spacebar
     isJumping = true;
     jumpVelocity = jumpForce;
+    wingPixelOffset = -25; // Move wing pixel up when jump starts
   }
   
   if (isJumping) {
     jumpHeight += jumpVelocity;
     jumpVelocity += gravity;
+    wingPixelOffset = lerp(wingPixelOffset, 0, 0.1); // Smoothly return wing pixel
     
     // Check if landed
     if (jumpHeight >= 0) {
       jumpHeight = 0;
       jumpVelocity = 0;
       isJumping = false;
+      wingPixelOffset = 0;
     }
   }
 }
