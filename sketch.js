@@ -35,7 +35,7 @@ function setup() {
   // Set random position for apple
   // Keep apple away from edges by staying 100px within border
   appleX = random(100, width - 100);
-  appleY = random(100, height - 100);aw
+  appleY = random(100, height - 100);
 }
 
 function draw() {
