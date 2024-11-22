@@ -1,3 +1,5 @@
+import DIALOG from './dialog.js';
+
 const DIALOG = {
   pigeon: {
     greeting: "My my my, many many apples"
@@ -41,6 +43,33 @@ let grassHeight = 25; // Half of duck height (50)
 let grassColors = ['#2E8B57'];
 let pigeon;
 
+class GrassBlade {
+  constructor(x, y) {
+    this.x = x;
+    this.y = y;
+    this.height = random(20, 30);
+    this.width = 6.25;
+    this.angle = random(-0.1, 0.1);
+  }
+
+  draw() {
+    push();
+    translate(this.x, this.y);
+    rotate(this.angle + sin(windAngle) * 0.1);
+    fill(random(grassColors));
+    rect(0, 0, this.width, -this.height);
+    pop();
+  }
+
+  isInFrontOfDuck(duckX, duckY) {
+    return this.y > duckY - 25;
+  }
+
+  isInFrontOfApple(appleX, appleY) {
+    return this.y > appleY - 25;
+  }
+}
+
 function preload() {
   historyFont = loadFont('m3x6.ttf');
 }
@@ -65,7 +94,7 @@ function setup() {
   // Initialize grass blades with random spacing (reduced density)
   for (let y = 0; y < height; y += 50) {
     for (let x = 0; x < width + 6.25; x += 37.5) {
-      if (random() < 0.35) { // Reduced chance from 0.7 to 0.35
+      if (random() < 0.35) {
         grassBlades.push(new GrassBlade(x, y));
       }
     }
@@ -167,7 +196,7 @@ function draw() {
   textSize(200);
   textAlign(LEFT, TOP);
   fill(0);
-  text(score, 20, -30);
+  text(score, 50, 50);
 }
 
 function drawDuck(x, y) {
@@ -286,9 +315,8 @@ function drawShadow(x, y, size) {
 }
 
 function drawAppleShadow(x, y) {
-  fill(0, 0, 0, 50); // Semi-transparent black
-  rect(x - 25, y + 12.5, 50, 12.5); // Base shadow
-  rect(x - 12.5, y + 6.25, 25, 6.25); // Top shadow
+  fill(0, 0, 0, 50);
+  ellipse(x, y + 5, 50, 12.5);
 }
 
 class Pigeon {
