@@ -449,15 +449,15 @@ function getRandomDialog(character, category) {
 
 function drawDialog(x, y, text) {
   push();
+  textFont(historyFont);
+  textSize(100); // Half of score font size (200)
   textAlign(CENTER);
-  textSize(24);
   
-  // Draw speech bubble
-  fill(255);
-  rect(x - 100, y - 75, 200, 40);
+  // Position at bottom of screen
+  let dialogY = height - 100; // Offset from bottom
   
-  // Draw text
-  fill(0);
-  text(text, x, y - 55);
+  // Draw text directly without background
+  fill(0); // Black text
+  text(text, width/2, dialogY);
   pop();
 }
