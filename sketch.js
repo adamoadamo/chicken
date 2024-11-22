@@ -77,9 +77,9 @@ function draw() {
   velocityX = constrain(velocityX, -maxSpeed, maxSpeed);
   velocityY = constrain(velocityY, -maxSpeed, maxSpeed);
 
-  // Update position
-  duckX += velocityX;
-  duckY += velocityY;
+  // Update position with boundaries
+  duckX = constrain(duckX + velocityX, 50 * duckSize, width - 50 * duckSize);
+  duckY = constrain(duckY + velocityY, 75 * duckSize, height - 25 * duckSize);
 
   // Handle jumping and shadow
   handleJump();
@@ -95,10 +95,8 @@ function draw() {
     drawApple(apple.x, apple.y);
   });
 
-  // Draw duck shadow
+  // Draw duck shadow and duck last (on top)
   drawShadow(duckX, duckY, duckSize);
-
-  // Draw the duck last so it appears on top
   drawDuck(duckX, duckY + jumpHeight);
 
   // Blinking logic
@@ -256,5 +254,5 @@ function drawShadow(x, y, size) {
 
 function drawAppleShadow(x, y) {
   fill(0, 0, 0, 50); // Semi-transparent black
-  rect(x - 20, y + 5, 40, 10);
+  rect(x - 25, y + 12.5, 50, 12.5); // Shadow matches apple width
 }
