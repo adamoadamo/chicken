@@ -1,6 +1,5 @@
 import DIALOG from './dialog.js';
 import Pigeon from './entities/Pigeon.js';
-
 let duckColor = '#FFFFFF';
 let duckX = 400;
 let duckY = 400;
@@ -321,3 +320,4 @@ class GrassBlade {
     );
   }
 }
+

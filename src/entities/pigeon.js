@@ -1,5 +1,6 @@
 class Pigeon {
-    constructor() {
+    constructor(p5) {
+      this.p5 = p5;
       this.x = -50;
       this.y = -50;
       this.active = false;
@@ -12,34 +13,33 @@ class Pigeon {
     draw() {
       if (!this.active) return;
       
-      drawShadow(this.x, this.y, 1);
-      fill('#808080');
+      this.p5.fill('#808080');
       
       // Body
-      rect(this.x - 25, this.y - 50, 50, 50);
-      rect(this.x - 37.5, this.y - 43.75, 31.25, 31.25);
-      rect(this.x + 6.25, this.y - 43.75, 31.25, 31.25);
-      rect(this.x - 18.75, this.y - 75, 37.5, 18.75);
+      this.p5.rect(this.x - 25, this.y - 50, 50, 50);
+      this.p5.rect(this.x - 37.5, this.y - 43.75, 31.25, 31.25);
+      this.p5.rect(this.x + 6.25, this.y - 43.75, 31.25, 31.25);
+      this.p5.rect(this.x - 18.75, this.y - 75, 37.5, 18.75);
       
       // Eye and Beak
       if (this.direction <= 0) {
-        fill('#000000');
-        rect(this.x - 12.5, this.y - 68.75, 6.25, 6.25);
-        fill('#FF0000');
-        rect(this.x, this.y - 68.75, 6.25, 6.25);
+        this.p5.fill('#000000');
+        this.p5.rect(this.x - 12.5, this.y - 68.75, 6.25, 6.25);
+        this.p5.fill('#FF0000');
+        this.p5.rect(this.x, this.y - 68.75, 6.25, 6.25);
       } else {
-        fill('#000000');
-        rect(this.x + 6.25, this.y - 68.75, 6.25, 6.25);
-        fill('#FF0000');
-        rect(this.x - 6.25, this.y - 68.75, 6.25, 6.25);
+        this.p5.fill('#000000');
+        this.p5.rect(this.x + 6.25, this.y - 68.75, 6.25, 6.25);
+        this.p5.fill('#FF0000');
+        this.p5.rect(this.x - 6.25, this.y - 68.75, 6.25, 6.25);
       }
       
-      fill('#4B0082');
-      rect(this.x - 6.25, this.y - 62.5, 12.5, 6.25);
+      this.p5.fill('#4B0082');
+      this.p5.rect(this.x - 6.25, this.y - 62.5, 12.5, 6.25);
       
-      fill('#FF6B6B');
-      rect(this.x - 12.5, this.y, 6.25, 12.5);
-      rect(this.x + 6.25, this.y, 6.25, 12.5);
+      this.p5.fill('#FF6B6B');
+      this.p5.rect(this.x - 12.5, this.y, 6.25, 12.5);
+      this.p5.rect(this.x + 6.25, this.y, 6.25, 12.5);
     }
   
     update(duckX, duckY, score) {
