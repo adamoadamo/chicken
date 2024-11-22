@@ -65,34 +65,34 @@ function draw() {
 function drawChicken(x, y) {
   fill(chickenColor);
 
-  // Body (25% larger)
-  rect(x - 12.5, y - 25, 25, 25); // Main body
-  rect(x - 19, y - 19, 12.5, 12.5); // Left wing
-  rect(x + 6, y - 19, 12.5, 12.5); // Right wing
+  // Body (doubled in size)
+  rect(x - 25, y - 50, 50, 50); // Main body
+  rect(x - 38, y - 38, 25, 25); // Left wing
+  rect(x + 12, y - 38, 25, 25); // Right wing
 
   // Head
   push();
-  translate(x, y - 25); // Move to top of body
+  translate(x, y - 50); // Move to top of body
   rotate(radians(headTurnAngle));
-  rect(-6.25, -12.5, 12.5, 12.5); // Head
+  rect(-12.5, -25, 25, 25); // Head
 
   // Eye
   fill(0);
   if (eyeOpen) {
-    rect(-3.75, -8.75, 2.5, 2.5);
+    rect(-7.5, -17.5, 5, 5);
   } else {
-    rect(-3.75, -6.25, 2.5, 1.25);
+    rect(-7.5, -12.5, 5, 2.5);
   }
 
   // Beak
   fill(beakColor);
-  rect(0, -8.75, 6.25, 3.75);
+  rect(0, -17.5, 12.5, 7.5);
   pop();
 
   // Legs
   fill(0);
-  rect(x - 8.75, y, 3.75, 6.25);
-  rect(x + 5, y, 3.75, 6.25);
+  rect(x - 17.5, y, 7.5, 12.5);
+  rect(x + 10, y, 7.5, 12.5);
 }
 
 function keyPressed() {
