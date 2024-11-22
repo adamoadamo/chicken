@@ -378,8 +378,8 @@ function handlePigeon() {
       pigeonDirection = dx > 0 ? 1 : -1;
     } else if (!currentDialog) {
       playerCanMove = false;
-      currentDialog = DIALOG.pigeon.choices.question1;
-      dialogChoices = currentDialog.options;
+      currentDialog = DIALOG.pigeon.choices.question1.prompt;
+      dialogChoices = DIALOG.pigeon.choices.question1.options;
       dialogTimer = dialogDuration;
     }
     
@@ -412,9 +412,9 @@ function drawDialog(x, y, dialogText, choices = null) {
   text(dialogText, width/2, dialogY);
   
   // Draw choices if they exist
-  if (choices) {
-    choices.forEach((choice, i) => {
-      let choiceY = dialogY + 80;
+  if (dialogChoices.length > 0) {
+    let choiceY = dialogY + 80;
+    dialogChoices.forEach((choice, i) => {
       let choiceX = width/2 + (i === 0 ? -200 : 200);
       
       // Draw choice background
