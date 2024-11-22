@@ -10,6 +10,9 @@ let blinkInterval; // Random interval for blinking
 let chickenX = 400; // Center of 800x800 canvas
 let chickenY = 400; // Center of 800x800 canvas
 let moveSpeed = 6;  // Slightly faster movement speed
+let appleColor = '#FF0000';     // Red
+let stemColor = '#4B2F1C';      // Brown
+let leafColor = '#228B22';      // Forest Green
 
 function setup() {
   createCanvas(800, 800);
@@ -60,6 +63,8 @@ function draw() {
 
   // Update head rotation angle
   headTurnAngle = turnDirection * 10;
+
+  drawApple(200, 200);  // Draw apple at position (200,200)
 }
 
 function drawChicken(x, y) {
@@ -93,6 +98,23 @@ function drawChicken(x, y) {
   fill(0);
   rect(x - 17.5, y, 7.5, 12.5);
   rect(x + 10, y, 7.5, 12.5);
+}
+
+function drawApple(x, y) {
+  // Main apple body
+  fill(appleColor);
+  rect(x - 25, y - 25, 50, 50);        // Center square
+  rect(x - 12.5, y - 37.5, 25, 12.5);  // Top middle
+  rect(x - 37.5, y - 12.5, 12.5, 25);  // Left middle
+  rect(x + 25, y - 12.5, 12.5, 25);    // Right middle
+  
+  // Stem
+  fill(stemColor);
+  rect(x - 6.25, y - 50, 12.5, 12.5);
+  
+  // Leaf
+  fill(leafColor);
+  rect(x + 6.25, y - 50, 12.5, 12.5);
 }
 
 function keyPressed() {
