@@ -1,11 +1,5 @@
 import DIALOG from './dialog.js';
 
-const DIALOG = {
-  pigeon: {
-    greeting: "My my my, many many apples"
-  }
-};
-
 let duckColor = '#FFFFFF';
 let duckX = 400;
 let duckY = 400;
