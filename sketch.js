@@ -153,11 +153,11 @@ function draw() {
   text(score, 20, -10);
 
   // Handle dialog display
-  if (currentDialog && dialogTimer > 0) {
-    drawDialog(pigeonX, pigeonY, currentDialog);
-    dialogTimer--;
-    if (dialogTimer <= 0) {
-      currentDialog = null;
+  if (dialogState.current !== 'none') {
+    if (currentDialog) {
+      drawDialog(pigeonX, pigeonY, currentDialog);
+    } else if (dialogState.current === 'choices') {
+      drawDialog(pigeonX, pigeonY, '');  // Draw empty dialog box for choices
     }
   }
 }
@@ -224,36 +224,33 @@ function drawApple(x, y) {
 
 function keyPressed() {
   if (currentDialog) {
-    if (dialogState.current === 'choices') {
-      if (keyCode === LEFT_ARROW) {
-        selectedChoice = 0;
-        return false;
-      } else if (keyCode === RIGHT_ARROW) {
-        selectedChoice = 1;
-        return false;
-      }
-    }
-    
     if (keyCode === 88) { // X key
-      if (dialogState.current === 'greeting') {
-        dialogState.current = 'choices';
-        dialogChoices = DIALOG.pigeon.choices.question1.options;
-        currentDialog = ''; // Clear the greeting text
-      } else if (dialogState.current === 'choices') {
-        let response = selectedChoice === 0 ? 'friendly' : 'unfriendly';
-        dialogState.current = 'response';
-        currentDialog = DIALOG.pigeon.choices.question1.responses[response];
-        dialogChoices = [];
-        dialogTimer = dialogDuration;
-        setTimeout(() => {
-          playerCanMove = true;
+      switch(dialogState.current) {
+        case 'greeting':
+          dialogState.current = 'choices';
+          dialogChoices = DIALOG.pigeon.choices.question1.options;
+          currentDialog = null;
+          break;
+          
+        case 'choices':
+          let response = selectedChoice === 0 ? 'friendly' : 'unfriendly';
+          dialogState.current = 'response';
+          currentDialog = DIALOG.pigeon.choices.question1.responses[response];
+          dialogChoices = [];
+          dialogTimer = dialogDuration;
+          break;
+          
+        case 'response':
           currentDialog = null;
           dialogState.current = 'none';
-        }, dialogDuration * 33);
-      } else if (dialogState.current === 'response') {
-        dialogTimer = 0;
-        currentDialog = null;
-        dialogState.current = 'none';
+          playerCanMove = true;
+          break;
+      }
+    } else if (dialogState.current === 'choices') {
+      if (keyCode === LEFT_ARROW) {
+        selectedChoice = 0;
+      } else if (keyCode === RIGHT_ARROW) {
+        selectedChoice = 1;
       }
     }
     return false;
@@ -396,8 +393,9 @@ function handlePigeon() {
     } else if (!currentDialog) {
       playerCanMove = false;
       dialogState.current = 'greeting';
-      currentDialog = DIALOG.pigeon.choices.question1.prompt;
+      currentDialog = "There are so many apples. I'm so hungry.";
       dialogTimer = dialogDuration;
+      dialogChoices = [];
     }
     
     drawShadow(pigeonX, pigeonY, 1);
