@@ -17,6 +17,7 @@ let appleX;
 let appleY;
 let historyFont;
 let score = 0;
+let duckSize = 1; // Scale multiplier for duck
 
 function preload() {
   historyFont = loadFont('m3x6.ttf');
@@ -93,40 +94,40 @@ function draw() {
 function drawDuck(x, y) {
   fill(duckColor);
 
-  // Body (doubled in size)
-  rect(x - 25, y - 50, 50, 50); // Main body
-  rect(x - 38, y - 38, 25, 25); // Left wing
-  rect(x + 12, y - 38, 25, 25); // Right wing
+  // Body (scaled with size)
+  rect(x - (25 * duckSize), y - (50 * duckSize), 50 * duckSize, 50 * duckSize); // Main body
+  rect(x - (38 * duckSize), y - (38 * duckSize), 25 * duckSize, 25 * duckSize); // Left wing
+  rect(x + (12 * duckSize), y - (38 * duckSize), 25 * duckSize, 25 * duckSize); // Right wing
 
-  // Head
-  rect(x - 12.5, y - 75, 25, 25); // Head
+  // Head (scaled with size)
+  rect(x - (12.5 * duckSize), y - (75 * duckSize), 25 * duckSize, 25 * duckSize); // Head
 
   // Eye and Beak
   if (turnDirection <= 0) {  // Looking left or center
     // Eye
     fill(0);
     if (eyeOpen) {
-      rect(x - 7.5, y - 67.5, 5, 5);
+      rect(x - (7.5 * duckSize), y - (67.5 * duckSize), 5 * duckSize, 5 * duckSize);
     } else {
-      rect(x - 7.5, y - 62.5, 5, 2.5);
+      rect(x - (7.5 * duckSize), y - (62.5 * duckSize), 5 * duckSize, 2.5 * duckSize);
     }
     // Beak
     fill(beakColor);
-    rect(x - 12.5, y - 67.5, 12.5, 7.5);
+    rect(x - (12.5 * duckSize), y - (67.5 * duckSize), 12.5 * duckSize, 7.5 * duckSize);
   } else {  // Looking right
     // Eye
     fill(0);
     if (eyeOpen) {
-      rect(x + 2.5, y - 67.5, 5, 5);
+      rect(x + (2.5 * duckSize), y - (67.5 * duckSize), 5 * duckSize, 5 * duckSize);
     } else {
-      rect(x + 2.5, y - 62.5, 5, 2.5);
+      rect(x + (2.5 * duckSize), y - (62.5 * duckSize), 5 * duckSize, 2.5 * duckSize);
     }
     // Beak
     fill(beakColor);
-    rect(x, y - 67.5, 12.5, 7.5);
+    rect(x, y - (67.5 * duckSize), 12.5 * duckSize, 7.5 * duckSize);
   }
 
-  // Legs
+  // Legs (unchanged size)
   fill(0);
   rect(x - 17.5, y, 7.5, 12.5);
   rect(x + 10, y, 7.5, 12.5);
@@ -155,13 +156,10 @@ function keyPressed() {
 }
 
 function checkCollision() {
-  // Calculate the distance between duck and apple centers
   let d = dist(duckX, duckY - 25, appleX, appleY);
-  // If distance is less than their combined radii (using 50 as approximate size)
   if (d < 75) {
-    // Increase score
     score++;
-    // Move apple to new random position
+    duckSize += 0.1; // Increase size by 10%
     appleX = random(100, width - 100);
     appleY = random(100, height - 100);
   }
