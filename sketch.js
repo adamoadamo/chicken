@@ -30,8 +30,9 @@ let apples = [{x: 400, y: 400}]; // Start with one apple
 let maxApples = 1;               // Will increase as score goes up
 let grassBlades = [];
 let windAngle = 0;
-let windSpeed = 0.02;
+let windSpeed = 0.1;
 let grassHeight = 25; // Half of duck height (50)
+let grassColors = ['#228B22', '#2E8B57', '#3CB371']; // Different shades of green
 
 function preload() {
   historyFont = loadFont('m3x6.ttf');
@@ -53,7 +54,7 @@ function setup() {
   appleY = random(100, height - 100);
 
   // Initialize grass blades across the width of the canvas
-  for (let x = 0; x < width; x += 6.25) {
+  for (let x = 0; x < width + 6.25; x += 6.25) {
     grassBlades.push(new GrassBlade(x));
   }
 }
@@ -129,14 +130,16 @@ function draw() {
   // Update wind
   windAngle += windSpeed;
 
-  // Draw grass (before apples and duck)
+  // Draw grass behind
   grassBlades.forEach(blade => {
     blade.draw();
   });
 
-  // Draw some grass blades in front
+  // Draw rest of scene (apples, duck, etc)
+
+  // Draw some grass in front
   grassBlades.forEach(blade => {
-    if (random() < 0.3) { // 30% chance to draw in front
+    if (blade.height === 18.75 && random() < 0.3) { // Only shortest grass in front, 30% chance
       blade.draw();
     }
   });
@@ -265,20 +268,16 @@ function drawAppleShadow(x, y) {
 class GrassBlade {
   constructor(x) {
     this.x = x;
-    this.baseY = height - 6.25; // Ground level
-    this.height = random(18.75, 25); // Random height between 18.75-25 pixels
-    this.swayOffset = random(0, TWO_PI); // Random starting phase
-    this.width = 6.25; // Standard unit width
+    this.baseY = height;
+    this.height = random([18.75, 25, 31.25]); // Three possible heights in 6.25 increments
+    this.swayOffset = random([0, PI/2, PI, PI*1.5]); // Four possible phases
+    this.width = 6.25;
+    this.color = random(grassColors);
   }
   
   draw() {
-    let sway = sin(windAngle + this.swayOffset) * 6.25;
-    fill('#228B22'); // Forest green like the leaf
-    // Draw grass blade as a rectangle that leans
-    push();
-    translate(this.x, this.baseY);
-    rotate(sway * 0.1); // Convert sway to rotation
-    rect(0, 0, this.width, -this.height);
-    pop();
+    let sway = round(sin(windAngle + this.swayOffset) * 6.25 / 6.25) * 6.25; // Quantize to 6.25
+    fill(this.color);
+    rect(this.x + sway, this.baseY - this.height, this.width, this.height);
   }
 }
