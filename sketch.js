@@ -292,17 +292,17 @@ class GrassBlade {
 
   isInFrontOfDuck(duckX, duckY) {
     return (
-      Math.abs(this.x - duckX) < 25 &&
-      this.baseY > duckY - 12.5 &&
-      this.baseY < duckY + 25
+      Math.abs(this.x - duckX) < 31.25 && // Increased from 25 to 31.25 (5 * 6.25)
+      this.baseY > duckY - 18.75 && // Increased from 12.5 to 18.75 (3 * 6.25)
+      this.baseY < duckY + 31.25 // Increased from 25 to 31.25 (5 * 6.25)
     );
   }
 
   isInFrontOfApple(appleX, appleY) {
     return (
-      Math.abs(this.x - appleX) < 25 &&
-      this.baseY > appleY - 12.5 &&
-      this.baseY < appleY + 25
+      Math.abs(this.x - appleX) < 31.25 && // Increased from 25 to 31.25 (5 * 6.25)
+      this.baseY > appleY - 18.75 && // Increased from 12.5 to 18.75 (3 * 6.25)
+      this.baseY < appleY + 31.25 // Increased from 25 to 31.25 (5 * 6.25)
     );
   }
 }
