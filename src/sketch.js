@@ -65,7 +65,13 @@ class GrassBlade {
 }
 
 function preload() {
-  historyFont = loadFont('m3x6.ttf');
+  try {
+    historyFont = loadFont('m3x6.ttf');
+  } catch (e) {
+    console.error('Failed to load font:', e);
+    // Use a system font as fallback
+    historyFont = 'monospace';
+  }
 }
 
 function setup() {
@@ -81,11 +87,10 @@ function setup() {
   turnInterval = random(120, 240);
   
   // Set random position for apple
-  // Keep apple away from edges by staying 100px within border
   appleX = random(100, width - 100);
   appleY = random(100, height - 100);
 
-  // Initialize grass blades with random spacing (reduced density)
+  // Initialize grass blades
   for (let y = 0; y < height; y += 50) {
     for (let x = 0; x < width + 6.25; x += 37.5) {
       if (random() < 0.35) {
