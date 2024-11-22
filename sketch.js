@@ -247,6 +247,7 @@ function keyPressed() {
           currentDialog = null;
           dialogState.current = 'none';
           playerCanMove = true;
+          pigeonActive = false;
           break;
       }
     }
