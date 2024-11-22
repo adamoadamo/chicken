@@ -42,7 +42,7 @@ class Pigeon {
       rect(this.x + 6.25, this.y, 6.25, 12.5);
     }
   
-    update(duckX, duckY) {
+    update(duckX, duckY, score) {
       if (!this.active && score >= 10) {
         this.activate();
       }

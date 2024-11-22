@@ -57,10 +57,10 @@ function setup() {
   appleX = random(100, width - 100);
   appleY = random(100, height - 100);
 
-  // Initialize grass blades with random spacing
-  for (let y = 0; y < height; y += 50) { // Doubled vertical spacing
-    for (let x = 0; x < width + 6.25; x += 37.5) { // Doubled horizontal spacing
-      if (random() < 0.7) {
+  // Initialize grass blades with random spacing (reduced density)
+  for (let y = 0; y < height; y += 50) {
+    for (let x = 0; x < width + 6.25; x += 37.5) {
+      if (random() < 0.35) { // Reduced chance from 0.7 to 0.35
         grassBlades.push(new GrassBlade(x, y));
       }
     }
@@ -146,7 +146,7 @@ function draw() {
   });
 
   // Handle pigeon
-  pigeon.update(duckX, duckY);
+  pigeon.update(duckX, duckY, score);
   pigeon.draw();
 
   if (pigeon.showDialog) {
