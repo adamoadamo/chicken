@@ -358,7 +358,7 @@ function drawPigeon(x, y) {
 }
 
 function handlePigeon() {
-  if (score === 20 && !pigeonActive) {
+  if (score === 5 && !pigeonActive) {
     pigeonActive = true;
     // Choose random side to enter from
     let side = floor(random(4));
