@@ -19,7 +19,7 @@ let historyFont;
 let score = 0;
 
 function preload() {
-  historyFont = loadFont('History-Seven.otf');
+  historyFont = loadFont('m3x6.ttf');
 }
 
 function setup() {
