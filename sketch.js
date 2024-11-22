@@ -88,7 +88,7 @@ function draw() {
   textSize(200);  // Doubled size
   textAlign(LEFT, TOP);
   fill(0);
-  text(score, 20, 20);  // Just the number
+  text(score, 20, -30);  // Moved Y position from 20 to -30
 }
 
 function drawDuck(x, y) {
@@ -159,7 +159,7 @@ function checkCollision() {
   let d = dist(duckX, duckY - 25, appleX, appleY);
   if (d < 75) {
     score++;
-    duckSize += 0.1; // Increase size by 10%
+    duckSize += 0.25; // Increase by 25% which matches our pixel scale of 12.5
     appleX = random(100, width - 100);
     appleY = random(100, height - 100);
   }
