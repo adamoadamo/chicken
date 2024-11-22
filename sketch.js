@@ -15,6 +15,12 @@ let stemColor = '#4B2F1C';      // Brown
 let leafColor = '#228B22';      // Forest Green
 let appleX;
 let appleY;
+let historyFont;
+let score = 0;
+
+function preload() {
+  historyFont = loadFont('History-Seven.otf');
+}
 
 function setup() {
   createCanvas(800, 800);
@@ -72,6 +78,16 @@ function draw() {
   headTurnAngle = turnDirection * 10;
 
   drawApple(appleX, appleY);  // Draw apple at random position
+
+  // Check for collision
+  checkCollision();
+  
+  // Draw score
+  textFont(historyFont);
+  textSize(48);
+  textAlign(LEFT, TOP);
+  fill(0);
+  text('Score: ' + score, 20, 20);
 }
 
 function drawChicken(x, y) {
@@ -127,4 +143,17 @@ function drawApple(x, y) {
 function keyPressed() {
   // This empty function ensures p5.js is listening for keyboard events
   return false; // Prevents default browser behaviors
+}
+
+function checkCollision() {
+  // Calculate the distance between chicken and apple centers
+  let d = dist(chickenX, chickenY - 25, appleX, appleY);
+  // If distance is less than their combined radii (using 50 as approximate size)
+  if (d < 75) {
+    // Increase score
+    score++;
+    // Move apple to new random position
+    appleX = random(100, width - 100);
+    appleY = random(100, height - 100);
+  }
 }
