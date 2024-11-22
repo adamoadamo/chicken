@@ -111,9 +111,12 @@ function drawDuck(x, y) {
   rect(x - (38 * duckSize), y - (38 * duckSize), 25 * duckSize, 25 * duckSize); // Left wing
   rect(x + (12 * duckSize), y - (38 * duckSize), 25 * duckSize, 25 * duckSize); // Right wing
 
-  // Floating wing pixels
-  rect(x - (50.5 * duckSize), y - (38 * duckSize) + wingPixelOffset, 12.5 * duckSize, 12.5 * duckSize); // Left floating pixel
-  rect(x + (37 * duckSize), y - (38 * duckSize) + wingPixelOffset, 12.5 * duckSize, 12.5 * duckSize); // Right floating pixel
+  // Only draw floating wing pixels when jumping
+  if (isJumping) {
+    // Floating wing pixels
+    rect(x - (50.5 * duckSize), y - (38 * duckSize) + wingPixelOffset, 12.5 * duckSize, 12.5 * duckSize); // Left floating pixel
+    rect(x + (37 * duckSize), y - (38 * duckSize) + wingPixelOffset, 12.5 * duckSize, 12.5 * duckSize); // Right floating pixel
+  }
 
   // Head (scaled with size)
   rect(x - (12.5 * duckSize), y - (75 * duckSize), 25 * duckSize, 25 * duckSize); // Head
