@@ -1,4 +1,4 @@
-import DIALOG from 'dialog.js';
+import DIALOG from './dialog.js';
 
 let duckColor = '#FFFFFF';
 let duckX = 400;
