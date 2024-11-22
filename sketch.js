@@ -45,10 +45,7 @@ let dialogDuration = 90; // 3 seconds at 30 fps
 const DIALOG = {
   pigeon: {
     greetings: [
-      "My my my, many many apples",
-      "What a lovely day for apples",
-      "Oh, another duck collecting apples?",
-      "Coo coo, look who's here"
+      "There are so many apples. I'm so hungry."
     ],
     farewell: [
       "Off I go!",
