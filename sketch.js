@@ -61,7 +61,7 @@ function setup() {
   // Initialize grass blades with random spacing
   for (let y = 0; y < height; y += 25) { // Closer vertical spacing
     for (let x = 0; x < width + 6.25; x += 18.75) { // Variable horizontal spacing
-      if (random() < 0.7) { // 70% chance to place grass
+      if (random() < 0.35) { // Reduced from 0.7 to 0.35 (half the probability)
         grassBlades.push(new GrassBlade(x, y));
       }
     }
