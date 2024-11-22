@@ -28,6 +28,10 @@ let friction = 0.9;
 let maxSpeed = 12;
 let apples = [{x: 400, y: 400}]; // Start with one apple
 let maxApples = 1;               // Will increase as score goes up
+let grassBlades = [];
+let windAngle = 0;
+let windSpeed = 0.02;
+let grassHeight = 25; // Half of duck height (50)
 
 function preload() {
   historyFont = loadFont('m3x6.ttf');
@@ -47,6 +51,11 @@ function setup() {
   // Keep apple away from edges by staying 100px within border
   appleX = random(100, width - 100);
   appleY = random(100, height - 100);
+
+  // Initialize grass blades across the width of the canvas
+  for (let x = 0; x < width; x += 6.25) {
+    grassBlades.push(new GrassBlade(x));
+  }
 }
 
 function draw() {
@@ -116,6 +125,21 @@ function draw() {
   textAlign(LEFT, TOP);
   fill(0);
   text(score, 20, -30);  // Moved Y position from 20 to -30
+
+  // Update wind
+  windAngle += windSpeed;
+
+  // Draw grass (before apples and duck)
+  grassBlades.forEach(blade => {
+    blade.draw();
+  });
+
+  // Draw some grass blades in front
+  grassBlades.forEach(blade => {
+    if (random() < 0.3) { // 30% chance to draw in front
+      blade.draw();
+    }
+  });
 }
 
 function drawDuck(x, y) {
@@ -236,4 +260,25 @@ function drawShadow(x, y, size) {
 function drawAppleShadow(x, y) {
   fill(0, 0, 0, 50); // Semi-transparent black
   rect(x - 25, y + 12.5, 50, 12.5); // Shadow matches apple width
+}
+
+class GrassBlade {
+  constructor(x) {
+    this.x = x;
+    this.baseY = height - 6.25; // Ground level
+    this.height = random(18.75, 25); // Random height between 18.75-25 pixels
+    this.swayOffset = random(0, TWO_PI); // Random starting phase
+    this.width = 6.25; // Standard unit width
+  }
+  
+  draw() {
+    let sway = sin(windAngle + this.swayOffset) * 6.25;
+    fill('#228B22'); // Forest green like the leaf
+    // Draw grass blade as a rectangle that leans
+    push();
+    translate(this.x, this.baseY);
+    rotate(sway * 0.1); // Convert sway to rotation
+    rect(0, 0, this.width, -this.height);
+    pop();
+  }
 }
