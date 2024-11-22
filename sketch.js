@@ -13,6 +13,8 @@ let moveSpeed = 6;  // Slightly faster movement speed
 let appleColor = '#FF0000';     // Red
 let stemColor = '#4B2F1C';      // Brown
 let leafColor = '#228B22';      // Forest Green
+let appleX;
+let appleY;
 
 function setup() {
   createCanvas(800, 800);
@@ -23,6 +25,11 @@ function setup() {
   // Initialize blink and turn intervals
   blinkInterval = random(60, 180);
   turnInterval = random(120, 240);
+  
+  // Set random position for apple
+  // Keep apple away from edges by staying 100px within border
+  appleX = random(100, width - 100);
+  appleY = random(100, height - 100);
 }
 
 function draw() {
@@ -64,7 +71,7 @@ function draw() {
   // Update head rotation angle
   headTurnAngle = turnDirection * 10;
 
-  drawApple(200, 200);  // Draw apple at position (200,200)
+  drawApple(appleX, appleY);  // Draw apple at random position
 }
 
 function drawChicken(x, y) {
