@@ -26,9 +26,11 @@ let jumpForce = -12;
 let wingPixelOffset = 0;
 let velocityX = 0;
 let velocityY = 0;
-let acceleration = 0.8;
-let friction = 0.85;
-let maxSpeed = 8;
+let acceleration = 1.2;
+let friction = 0.9;
+let maxSpeed = 12;
+let apples = [{x: 400, y: 400}]; // Start with one apple
+let maxApples = 1;               // Will increase as score goes up
 
 function preload() {
   historyFont = loadFont('m3x6.ttf');
@@ -105,7 +107,10 @@ function draw() {
   // Update head rotation angle
   headTurnAngle = turnDirection * 10;
 
-  drawApple(appleX, appleY);  // Draw apple at random position
+  // Draw all apples
+  apples.forEach(apple => {
+    drawApple(apple.x, apple.y);
+  });
 
   // Check for collision
   checkCollision();
@@ -192,12 +197,25 @@ function keyPressed() {
 }
 
 function checkCollision() {
-  let d = dist(duckX, duckY - 25, appleX, appleY);
-  if (d < 75) {
-    score++;
-    duckSize += 0.25; // Increase by 25% which matches our pixel scale of 12.5
-    appleX = random(100, width - 100);
-    appleY = random(100, height - 100);
+  // Check each apple for collision
+  for (let i = apples.length - 1; i >= 0; i--) {
+    let d = dist(duckX, duckY - 25, apples[i].x, apples[i].y);
+    if (d < 75) {
+      score++;
+      // Remove eaten apple
+      apples.splice(i, 1);
+      
+      // Increase max apples every 5 points
+      maxApples = 1 + Math.floor(score / 5);
+      
+      // Add new apples until we reach maxApples
+      while (apples.length < maxApples) {
+        apples.push({
+          x: random(100, width - 100),
+          y: random(100, height - 100)
+        });
+      }
+    }
   }
 }
 
