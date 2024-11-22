@@ -33,6 +33,11 @@ let windAngle = 0;
 let windSpeed = 0.01;
 let grassHeight = 25; // Half of duck height (50)
 let grassColors = ['#2E8B57'];
+let pigeonX = -50;
+let pigeonY = -50;
+let pigeonActive = false;
+let pigeonSpeed = 3;
+let pigeonDirection = 0; // -1 left, 0 center, 1 right
 
 function preload() {
   historyFont = loadFont('m3x6.ttf');
@@ -141,6 +146,9 @@ function draw() {
     }
   });
 
+  // Handle pigeon
+  handlePigeon();
+  
   // Draw score last (on top of everything)
   textFont(historyFont);
   textSize(200);
@@ -347,4 +355,50 @@ function drawPigeon(x, y) {
   fill('#FF6B6B'); // Pink legs
   rect(x - 12.5, y, 6.25, 12.5);
   rect(x + 6.25, y, 6.25, 12.5);
+}
+
+function handlePigeon() {
+  if (score === 20 && !pigeonActive) {
+    pigeonActive = true;
+    // Choose random side to enter from
+    let side = floor(random(4));
+    switch(side) {
+      case 0: // top
+        pigeonX = random(width);
+        pigeonY = -50;
+        break;
+      case 1: // right
+        pigeonX = width + 50;
+        pigeonY = random(height);
+        break;
+      case 2: // bottom
+        pigeonX = random(width);
+        pigeonY = height + 50;
+        break;
+      case 3: // left
+        pigeonX = -50;
+        pigeonY = random(height);
+        break;
+    }
+  }
+  
+  if (pigeonActive) {
+    // Calculate direction to duck
+    let dx = duckX - pigeonX;
+    let dy = duckY - pigeonY;
+    let dist = sqrt(dx * dx + dy * dy);
+    
+    // Only move if not close to duck
+    if (dist > 75) {
+      pigeonX += (dx / dist) * pigeonSpeed;
+      pigeonY += (dy / dist) * pigeonSpeed;
+      
+      // Update pigeon direction based on movement
+      pigeonDirection = dx > 0 ? 1 : -1;
+    }
+    
+    // Draw pigeon shadow and pigeon
+    drawShadow(pigeonX, pigeonY, 1);
+    drawPigeon(pigeonX, pigeonY);
+  }
 }
