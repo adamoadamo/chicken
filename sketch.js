@@ -1,4 +1,6 @@
-let chickenColor = '#FFFFFF'; // White
+let duckColor = '#FFFFFF';
+let duckX = 400;
+let duckY = 400;
 let beakColor = '#F4A500'; // Orange
 let eyeOpen = true; // State for the eye (open/closed)
 let headTurnAngle = 0; // Head rotation angle
@@ -7,8 +9,6 @@ let turnInterval; // Random interval for head turning
 let turnDirection = 0; // Direction of the head (left/right/neutral)
 let blinkTimer = 0; // Timer for blinking
 let blinkInterval; // Random interval for blinking
-let chickenX = 400; // Center of 800x800 canvas
-let chickenY = 400; // Center of 800x800 canvas
 let moveSpeed = 6;  // Slightly faster movement speed
 let appleColor = '#FF0000';     // Red
 let stemColor = '#4B2F1C';      // Brown
@@ -43,20 +43,20 @@ function draw() {
   
   // Handle WASD movement
   if (keyIsDown(87)) { // W key
-    chickenY -= moveSpeed;
+    duckY -= moveSpeed;
   }
   if (keyIsDown(83)) { // S key
-    chickenY += moveSpeed;
+    duckY += moveSpeed;
   }
   if (keyIsDown(65)) { // A key
-    chickenX -= moveSpeed;
+    duckX -= moveSpeed;
   }
   if (keyIsDown(68)) { // D key
-    chickenX += moveSpeed;
+    duckX += moveSpeed;
   }
 
-  // Draw the chicken at its current position
-  drawChicken(chickenX, chickenY);
+  // Draw the duck at its current position
+  drawDuck(duckX, duckY);
 
   // Blinking logic
   blinkTimer++;
@@ -84,14 +84,14 @@ function draw() {
   
   // Draw score
   textFont(historyFont);
-  textSize(48);
+  textSize(96);  // Doubled size
   textAlign(LEFT, TOP);
   fill(0);
-  text('Score: ' + score, 20, 20);
+  text(score, 20, 20);  // Just the number
 }
 
-function drawChicken(x, y) {
-  fill(chickenColor);
+function drawDuck(x, y) {
+  fill(duckColor);
 
   // Body (doubled in size)
   rect(x - 25, y - 50, 50, 50); // Main body
@@ -104,17 +104,27 @@ function drawChicken(x, y) {
   rotate(radians(headTurnAngle));
   rect(-12.5, -25, 25, 25); // Head
 
-  // Eye
+  // Eye (switches sides based on turn direction)
   fill(0);
-  if (eyeOpen) {
-    rect(-7.5, -17.5, 5, 5);
-  } else {
-    rect(-7.5, -12.5, 5, 2.5);
+  if (turnDirection <= 0) {  // Looking left or center
+    if (eyeOpen) {
+      rect(-7.5, -17.5, 5, 5);
+    } else {
+      rect(-7.5, -12.5, 5, 2.5);
+    }
+    // Beak on left side
+    fill(beakColor);
+    rect(-12.5, -17.5, 12.5, 7.5);
+  } else {  // Looking right
+    if (eyeOpen) {
+      rect(2.5, -17.5, 5, 5);
+    } else {
+      rect(2.5, -12.5, 5, 2.5);
+    }
+    // Beak on right side
+    fill(beakColor);
+    rect(0, -17.5, 12.5, 7.5);
   }
-
-  // Beak
-  fill(beakColor);
-  rect(0, -17.5, 12.5, 7.5);
   pop();
 
   // Legs
@@ -146,8 +156,8 @@ function keyPressed() {
 }
 
 function checkCollision() {
-  // Calculate the distance between chicken and apple centers
-  let d = dist(chickenX, chickenY - 25, appleX, appleY);
+  // Calculate the distance between duck and apple centers
+  let d = dist(duckX, duckY - 25, appleX, appleY);
   // If distance is less than their combined radii (using 50 as approximate size)
   if (d < 75) {
     // Increase score
