@@ -107,12 +107,13 @@ function drawDuck(x, y) {
   // Body (scaled with size)
   rect(x - (25 * duckSize), y - (50 * duckSize), 50 * duckSize, 50 * duckSize); // Main body
 
-  // Wings with floating pixel
-  rect(x - (38 * duckSize), y - (38 * duckSize), 12.5 * duckSize, 25 * duckSize); // Left wing base
-  rect(x - (25.5 * duckSize), y - (38 * duckSize) + wingPixelOffset, 12.5 * duckSize, 12.5 * duckSize); // Left wing pixel that moves
+  // Original wings
+  rect(x - (38 * duckSize), y - (38 * duckSize), 25 * duckSize, 25 * duckSize); // Left wing
+  rect(x + (12 * duckSize), y - (38 * duckSize), 25 * duckSize, 25 * duckSize); // Right wing
 
-  rect(x + (12 * duckSize), y - (38 * duckSize), 12.5 * duckSize, 25 * duckSize); // Right wing base
-  rect(x + (24.5 * duckSize), y - (38 * duckSize) + wingPixelOffset, 12.5 * duckSize, 12.5 * duckSize); // Right wing pixel that moves
+  // Floating wing pixels
+  rect(x - (50.5 * duckSize), y - (38 * duckSize) + wingPixelOffset, 12.5 * duckSize, 12.5 * duckSize); // Left floating pixel
+  rect(x + (37 * duckSize), y - (38 * duckSize) + wingPixelOffset, 12.5 * duckSize, 12.5 * duckSize); // Right floating pixel
 
   // Head (scaled with size)
   rect(x - (12.5 * duckSize), y - (75 * duckSize), 25 * duckSize, 25 * duckSize); // Head
