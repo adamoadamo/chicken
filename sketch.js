@@ -2,13 +2,10 @@ let duckColor = '#FFFFFF';
 let duckX = 400;
 let duckY = 400;
 let beakColor = '#F4A500'; // Orange
-let eyeOpen = true; // State for the eye (open/closed)
 let headTurnAngle = 0; // Head rotation angle
 let turnTimer = 0; // Timer for head turn
 let turnInterval; // Random interval for head turning
 let turnDirection = 0; // Direction of the head (left/right/neutral)
-let blinkTimer = 0; // Timer for blinking
-let blinkInterval; // Random interval for blinking
 let moveSpeed = 6;  // Slightly faster movement speed
 let appleColor = '#FF0000';     // Red
 let stemColor = '#4B2F1C';      // Brown
@@ -99,14 +96,6 @@ function draw() {
   drawShadow(duckX, duckY, duckSize);
   drawDuck(duckX, duckY + jumpHeight);
 
-  // Blinking logic
-  blinkTimer++;
-  if (blinkTimer >= blinkInterval) {
-    eyeOpen = !eyeOpen;
-    blinkTimer = 0;
-    blinkInterval = random(60, 180);
-  }
-
   // Head turning logic
   turnTimer++;
   if (turnTimer >= turnInterval) {
@@ -156,22 +145,14 @@ function drawDuck(x, y) {
     rect(x - (12.5 * duckSize), y - (62.5 * duckSize), 12.5 * duckSize, 6.25 * duckSize);
     // Eye to the right of beak
     fill(0);
-    if (eyeOpen) {
-      rect(x + (2.5 * duckSize), y - (67.5 * duckSize), 6.25 * duckSize, 6.25 * duckSize);
-    } else {
-      rect(x + (2.5 * duckSize), y - (62.5 * duckSize), 6.25 * duckSize, 2.5 * duckSize);
-    }
+    rect(x, y - (62.5 * duckSize), 6.25 * duckSize, 6.25 * duckSize);
   } else {  // Looking right
     // Beak first
     fill(beakColor);
-    rect(x, y - (67.5 * duckSize), 12.5 * duckSize, 7.5 * duckSize);
+    rect(x, y - (62.5 * duckSize), 12.5 * duckSize, 6.25 * duckSize);
     // Eye to the left of beak
     fill(0);
-    if (eyeOpen) {
-      rect(x - (6.25* duckSize), y - (62.5 * duckSize), 6.25 * duckSize, 6.25 * duckSize);
-    } else {
-      rect(x - (6.25 * duckSize), y - (62.5 * duckSize), 6.25 * duckSize, 2.5 * duckSize);
-    }
+    rect(x - (6.25 * duckSize), y - (62.5 * duckSize), 6.25 * duckSize, 6.25 * duckSize);
   }
 
   // Legs (unchanged size)
@@ -248,8 +229,8 @@ function handleJump() {
 
 function drawShadow(x, y, size) {
   fill(0, 0, 0, 50); // Semi-transparent black
-  let shadowSize = map(jumpHeight, -100, 0, 0.5, 1); // Shadow gets smaller as duck jumps
-  rect(x - (25 * size), y + 5, 50 * size * shadowSize, 12.5 * shadowSize);
+  let shadowSize = max(map(jumpHeight, -100, 0, 0.5, 1), 0.5); // Shadow never smaller than half size
+  rect(x - (25 * size), y + 5, 50 * size * shadowSize, max(12.5 * shadowSize, 6.25));
 }
 
 function drawAppleShadow(x, y) {
