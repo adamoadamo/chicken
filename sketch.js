@@ -43,6 +43,7 @@ let dialogState = {
   current: 'none', // none, greeting, choices, response
   sequence: ['greeting', 'choices', 'response']
 };
+let currentDialogIndex = 0;
 
 const DIALOG = {
   pigeon: {
@@ -227,9 +228,13 @@ function keyPressed() {
     if (keyCode === 88) { // X key
       switch(dialogState.current) {
         case 'greeting':
-          dialogState.current = 'choices';
-          dialogChoices = DIALOG.pigeon.choices.question1.options;
-          currentDialog = null;
+          if (currentDialogIndex < currentDialog.length - 1) {
+            currentDialogIndex++;
+          } else {
+            dialogState.current = 'choices';
+            dialogChoices = DIALOG.pigeon.choices.question1.options;
+            currentDialogIndex = 0;
+          }
           break;
           
         case 'choices':
@@ -238,12 +243,17 @@ function keyPressed() {
           currentDialog = DIALOG.pigeon.choices.question1.responses[response];
           dialogChoices = [];
           dialogTimer = dialogDuration;
+          currentDialogIndex = 0;
           break;
           
         case 'response':
-          currentDialog = null;
-          dialogState.current = 'none';
-          playerCanMove = true;
+          if (currentDialogIndex < currentDialog.length - 1) {
+            currentDialogIndex++;
+          } else {
+            currentDialog = null;
+            dialogState.current = 'none';
+            playerCanMove = true;
+          }
           break;
       }
     } else if (dialogState.current === 'choices') {
@@ -393,8 +403,9 @@ function handlePigeon() {
     } else if (!currentDialog && dialogState.current === 'none') {
       playerCanMove = false;
       dialogState.current = 'greeting';
-      currentDialog = getRandomDialog('pigeon', 'greetings');
+      currentDialog = [getRandomDialog('pigeon', 'greetings')];
       dialogTimer = dialogDuration;
+      currentDialogIndex = 0;
     }
     
     drawShadow(pigeonX, pigeonY, 1);
@@ -423,32 +434,12 @@ function drawDialog(x, y, dialogText) {
   fill(255);
   rect(padding, boxY, boxWidth, boxHeight, 12.5);
   
-  // Calculate text wrapping and positioning
-  let words = dialogText.split(' ');
-  let line = '';
-  let lines = [];
-  let maxWidth = boxWidth - padding * 2;
-  
-  for (let word of words) {
-    let testLine = line + word + ' ';
-    if (textWidth(testLine) > maxWidth) {
-      lines.push(line);
-      line = word + ' ';
-    } else {
-      line = testLine;
-    }
-  }
-  lines.push(line);
-  
-  // Draw text centered in box
+  // Draw current line of text centered in box
   fill(0);
   let lineHeight = 80;
-  let totalTextHeight = lines.length * lineHeight;
-  let startY = boxY + (boxHeight - totalTextHeight)/2 + lineHeight;
+  let startY = boxY + (boxHeight - lineHeight)/2 + lineHeight;
   
-  lines.forEach((line, i) => {
-    text(line.trim(), width/2, startY + (i * lineHeight));
-  });
+  text(dialogText[currentDialogIndex], width/2, startY);
   
   pop();
 }
