@@ -38,6 +38,32 @@ let pigeonY = -50;
 let pigeonActive = false;
 let pigeonSpeed = 3;
 let pigeonDirection = 0; // -1 left, 0 center, 1 right
+let currentDialog = null;
+let dialogTimer = 0;
+let dialogDuration = 90; // 3 seconds at 30 fps
+
+const DIALOG = {
+  pigeon: {
+    greetings: [
+      "My my my, many many apples",
+      "What a lovely day for apples",
+      "Oh, another duck collecting apples?",
+      "Coo coo, look who's here"
+    ],
+    farewell: [
+      "Off I go!",
+      "Until next time",
+      "Watch those apples for me"
+    ]
+  },
+  duck: {
+    collecting: [
+      "Yum!",
+      "Another one!",
+      "Delicious!"
+    ]
+  }
+};
 
 function preload() {
   historyFont = loadFont('m3x6.ttf');
@@ -155,6 +181,15 @@ function draw() {
   textAlign(LEFT, TOP);
   fill(0);
   text(score, 20, -30);
+
+  // Handle dialog display
+  if (currentDialog && dialogTimer > 0) {
+    drawDialog(pigeonX, pigeonY, currentDialog);
+    dialogTimer--;
+    if (dialogTimer <= 0) {
+      currentDialog = null;
+    }
+  }
 }
 
 function drawDuck(x, y) {
@@ -395,10 +430,34 @@ function handlePigeon() {
       
       // Update pigeon direction based on movement
       pigeonDirection = dx > 0 ? 1 : -1;
+    } else if (!currentDialog) {
+      // When pigeon reaches duck, show dialog
+      currentDialog = getRandomDialog('pigeon', 'greetings');
+      dialogTimer = dialogDuration;
     }
     
     // Draw pigeon shadow and pigeon
     drawShadow(pigeonX, pigeonY, 1);
     drawPigeon(pigeonX, pigeonY);
   }
+}
+
+function getRandomDialog(character, category) {
+  const options = DIALOG[character][category];
+  return options[Math.floor(Math.random() * options.length)];
+}
+
+function drawDialog(x, y, text) {
+  push();
+  textAlign(CENTER);
+  textSize(24);
+  
+  // Draw speech bubble
+  fill(255);
+  rect(x - 100, y - 75, 200, 40);
+  
+  // Draw text
+  fill(0);
+  text(text, x, y - 55);
+  pop();
 }
