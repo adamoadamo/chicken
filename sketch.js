@@ -29,10 +29,10 @@ let maxSpeed = 12;
 let apples = [{x: 400, y: 400}]; // Start with one apple
 let maxApples = 1;               // Will increase as score goes up
 let grassBlades = [];
-let windAngle = 0;
-let windSpeed = 0.02;
+let windAngle = PI/4;
+let windSpeed = 0.01;
 let grassHeight = 25; // Half of duck height (50)
-let grassColors = ['#228B22', '#2E8B57', '#3CB371']; // Different shades of green
+let grassColors = ['#2E8B57'];
 
 function preload() {
   historyFont = loadFont('m3x6.ttf');
@@ -103,7 +103,7 @@ function draw() {
   checkCollision();
 
   // Draw ALL grass first
-  windAngle += windSpeed;
+  windAngle += sin(frameCount * 0.001) * 0.001;
   grassBlades.forEach(blade => {
     if (!blade.isInFrontOfDuck(duckX, duckY)) {
       blade.draw();
@@ -276,18 +276,21 @@ class GrassBlade {
     this.baseY = y + random(-12.5, 12.5);
     this.height = random([12.5, 18.75, 25, 31.25]);
     this.width = 6.25;
-    this.color = random(grassColors);
-    this.phase = x / width * TWO_PI; // Phase based on x position
+    this.color = '#2E8B57';
+    this.phase = x / width * TWO_PI;
   }
   
   draw() {
     fill(this.color);
+    // Calculate wind direction components
+    let windX = cos(windAngle) * 6.25;
+    let windY = sin(windAngle) * 6.25;
+    
     // Draw main grass blade
     rect(this.x, this.baseY, this.width, this.height - 6.25);
     
-    // Draw swaying top section
-    let windOffset = round(sin(windAngle + this.phase)) * 6.25;
-    rect(this.x + windOffset, this.baseY, this.width, 6.25);
+    // Draw swaying top section with both x and y offset
+    rect(this.x + round(windX), this.baseY + round(windY), this.width, 6.25);
   }
 
   isInFrontOfDuck(duckX, duckY) {
