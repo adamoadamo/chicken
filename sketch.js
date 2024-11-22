@@ -24,6 +24,11 @@ let jumpHeight = 0;
 let gravity = 0.5;
 let jumpForce = -12;
 let wingPixelOffset = 0;
+let velocityX = 0;
+let velocityY = 0;
+let acceleration = 0.8;
+let friction = 0.85;
+let maxSpeed = 8;
 
 function preload() {
   historyFont = loadFont('m3x6.ttf');
@@ -48,19 +53,31 @@ function setup() {
 function draw() {
   background('#3CB371'); // Green background
   
-  // Handle WASD movement
+  // Handle WASD movement with acceleration
   if (keyIsDown(87)) { // W key
-    duckY -= moveSpeed;
+    velocityY -= acceleration;
   }
   if (keyIsDown(83)) { // S key
-    duckY += moveSpeed;
+    velocityY += acceleration;
   }
   if (keyIsDown(65)) { // A key
-    duckX -= moveSpeed;
+    velocityX -= acceleration;
   }
   if (keyIsDown(68)) { // D key
-    duckX += moveSpeed;
+    velocityX += acceleration;
   }
+
+  // Apply friction
+  velocityX *= friction;
+  velocityY *= friction;
+
+  // Limit max speed
+  velocityX = constrain(velocityX, -maxSpeed, maxSpeed);
+  velocityY = constrain(velocityY, -maxSpeed, maxSpeed);
+
+  // Update position
+  duckX += velocityX;
+  duckY += velocityY;
 
   // Handle jumping and shadow
   handleJump();
