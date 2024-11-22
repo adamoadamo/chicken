@@ -18,6 +18,11 @@ let appleY;
 let historyFont;
 let score = 0;
 let duckSize = 1; // Scale multiplier for duck
+let isJumping = false;
+let jumpVelocity = 0;
+let jumpHeight = 0;
+let gravity = 0.5;
+let jumpForce = -12;
 
 function preload() {
   historyFont = loadFont('m3x6.ttf');
@@ -57,7 +62,7 @@ function draw() {
   }
 
   // Draw the duck at its current position
-  drawDuck(duckX, duckY);
+  drawDuck(duckX, duckY + jumpHeight);
 
   // Blinking logic
   blinkTimer++;
@@ -163,4 +168,29 @@ function checkCollision() {
     appleX = random(100, width - 100);
     appleY = random(100, height - 100);
   }
+}
+
+function handleJump() {
+  if (keyIsDown(32) && !isJumping) { // 32 is spacebar
+    isJumping = true;
+    jumpVelocity = jumpForce;
+  }
+  
+  if (isJumping) {
+    jumpHeight += jumpVelocity;
+    jumpVelocity += gravity;
+    
+    // Check if landed
+    if (jumpHeight >= 0) {
+      jumpHeight = 0;
+      jumpVelocity = 0;
+      isJumping = false;
+    }
+  }
+}
+
+function drawShadow(x, y, size) {
+  fill(0, 0, 0, 50); // Semi-transparent black
+  let shadowSize = map(jumpHeight, -100, 0, 0.5, 1); // Shadow gets smaller as duck jumps
+  rect(x - (25 * size), y + 5, 50 * size * shadowSize, 12.5 * shadowSize);
 }
