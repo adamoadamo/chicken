@@ -53,10 +53,12 @@ function setup() {
   appleX = random(100, width - 100);
   appleY = random(100, height - 100);
 
-  // Initialize grass blades with more spacing
-  for (let y = 0; y < height; y += 50) { // More vertical spacing
-    for (let x = 0; x < width + 6.25; x += 12.5) { // More horizontal spacing
-      grassBlades.push(new GrassBlade(x, y));
+  // Initialize grass blades with random spacing
+  for (let y = 0; y < height; y += 25) { // Closer vertical spacing
+    for (let x = 0; x < width + 6.25; x += 18.75) { // Variable horizontal spacing
+      if (random() < 0.7) { // 70% chance to place grass
+        grassBlades.push(new GrassBlade(x, y));
+      }
     }
   }
 }
@@ -132,24 +134,24 @@ function draw() {
   // Update wind
   windAngle += windSpeed;
 
-  // Draw background grass
+  // Draw ALL background grass
   grassBlades.forEach(blade => {
     if (!blade.isInFrontOfDuck(duckX, duckY)) {
       blade.draw();
     }
   });
 
-  // Draw scene elements (apples, duck, shadows)
+  // Draw apples and shadows
   apples.forEach(apple => {
     drawAppleShadow(apple.x, apple.y);
-  });
-  apples.forEach(apple => {
     drawApple(apple.x, apple.y);
   });
+
+  // Draw duck
   drawShadow(duckX, duckY, duckSize);
   drawDuck(duckX, duckY + jumpHeight);
 
-  // Draw foreground grass
+  // Draw ONLY the grass that's directly in front of duck
   grassBlades.forEach(blade => {
     if (blade.isInFrontOfDuck(duckX, duckY)) {
       blade.draw();
@@ -279,25 +281,26 @@ function drawAppleShadow(x, y) {
 
 class GrassBlade {
   constructor(x, y) {
-    this.x = x;
-    this.baseY = y;
-    this.height = random([18.75, 25]); // Only two heights for less density
+    this.x = x + random(-6.25, 6.25); // Slight x position variation
+    this.baseY = y + random(-12.5, 12.5); // Slight y position variation
+    this.height = random([12.5, 18.75, 25, 31.25]); // More height variations
     this.swayOffset = random([0, PI/2, PI, PI*1.5]);
     this.width = 6.25;
     this.color = random(grassColors);
   }
   
-  draw(isDuck) {
+  draw() {
     let sway = round(sin(windAngle + this.swayOffset) * 6.25 / 6.25) * 6.25;
     fill(this.color);
     rect(this.x + sway, this.baseY, this.width, this.height);
   }
 
   isInFrontOfDuck(duckX, duckY) {
+    // Only consider grass in front if it's within a small area in front of duck
     return (
-      this.x > duckX - 37.5 && 
-      this.x < duckX + 37.5 && 
-      this.baseY > duckY - 25
+      Math.abs(this.x - duckX) < 25 && // Within duck width
+      this.baseY > duckY - 12.5 && // Just slightly behind duck's vertical center
+      this.baseY < duckY + 25 // Not too far in front
     );
   }
 }
