@@ -98,18 +98,18 @@ function draw() {
   background('#3CB371');
   
   // Handle movement
-  if (keyIsDown(65)) { // A key
+  if (keyIsDown(LEFT_ARROW)) { // Left arrow (was A)
     velocityX -= acceleration;
     turnDirection = -1;
   }
-  if (keyIsDown(68)) { // D key
+  if (keyIsDown(RIGHT_ARROW)) { // Right arrow (was D)
     velocityX += acceleration;
     turnDirection = 1;
   }
-  if (keyIsDown(87)) { // W key
+  if (keyIsDown(UP_ARROW)) { // Up arrow (was W)
     velocityY -= acceleration;
   }
-  if (keyIsDown(83)) { // S key
+  if (keyIsDown(DOWN_ARROW)) { // Down arrow (was S)
     velocityY += acceleration;
   }
 
@@ -253,8 +253,12 @@ function drawApple(x, y) {
 }
 
 function keyPressed() {
-  // This empty function ensures p5.js is listening for keyboard events
-  return false; // Prevents default browser behaviors
+  // Advance dialog with X key
+  if (keyCode === 88 && currentDialog) { // 88 is X key
+    dialogTimer = 0;
+    currentDialog = null;
+  }
+  return false;
 }
 
 function checkCollision() {
@@ -280,18 +284,17 @@ function checkCollision() {
 }
 
 function handleJump() {
-  if (keyIsDown(32) && !isJumping) { // 32 is spacebar
+  if (keyIsDown(90) && !isJumping) { // 90 is Z key (was 32 for spacebar)
     isJumping = true;
     jumpVelocity = jumpForce;
-    wingPixelOffset = -25; // Move wing pixel up when jump starts
+    wingPixelOffset = -25;
   }
   
   if (isJumping) {
     jumpHeight += jumpVelocity;
     jumpVelocity += gravity;
-    wingPixelOffset = lerp(wingPixelOffset, 0, 0.1); // Smoothly return wing pixel
+    wingPixelOffset = lerp(wingPixelOffset, 0, 0.1);
     
-    // Check if landed
     if (jumpHeight >= 0) {
       jumpHeight = 0;
       jumpVelocity = 0;
@@ -450,14 +453,35 @@ function getRandomDialog(character, category) {
 function drawDialog(x, y, dialogText) {
   push();
   textFont(historyFont);
-  textSize(100); // Half of score font size (200)
-  textAlign(CENTER);
+  textSize(100);
+  textAlign(LEFT);
   
-  // Position at bottom of screen
-  let dialogY = height - 100; // Offset from bottom
+  // Position at bottom of screen with padding
+  let padding = 50;
+  let dialogY = height - 100;
   
-  // Draw text directly without background
-  fill(0); // Black text
-  text(dialogText, width/2, dialogY);
+  // Calculate wrapped text
+  let words = dialogText.split(' ');
+  let line = '';
+  let lines = [];
+  let maxWidth = width - (padding * 2);
+  
+  for (let word of words) {
+    let testLine = line + word + ' ';
+    if (textWidth(testLine) > maxWidth) {
+      lines.push(line);
+      line = word + ' ';
+    } else {
+      line = testLine;
+    }
+  }
+  lines.push(line);
+  
+  // Draw text lines
+  fill(0);
+  lines.forEach((line, i) => {
+    text(line, padding, dialogY + (i * 80));
+  });
+  
   pop();
 }
