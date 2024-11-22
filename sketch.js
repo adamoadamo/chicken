@@ -36,17 +36,28 @@ let pigeonDirection = 0; // -1 left, 0 center, 1 right
 let currentDialog = null;
 let dialogTimer = 0;
 let dialogDuration = 90; // 3 seconds at 30 fps
+let dialogChoices = [];
+let selectedChoice = 0;
+let playerCanMove = true;
 
 const DIALOG = {
   pigeon: {
     greetings: [
       "There are so many apples. I'm so hungry."
     ],
-    farewell: [
-      "Off I go!",
-      "Until next time",
-      "Watch those apples for me"
-    ]
+    choices: {
+      question1: {
+        prompt: "There are so many apples. I'm so hungry.",
+        options: [
+          "You can have some of mine!",
+          "These are MY apples!"
+        ],
+        responses: {
+          friendly: "You're so kind! Let's share them.",
+          unfriendly: "How rude! I'll remember this..."
+        }
+      }
+    }
   },
   duck: {
     collecting: [
@@ -81,19 +92,21 @@ function draw() {
   background('#3CB371');
   
   // Handle movement
-  if (keyIsDown(LEFT_ARROW)) {
-    velocityX -= acceleration;
-    turnDirection = -1;
-  }
-  if (keyIsDown(RIGHT_ARROW)) {
-    velocityX += acceleration;
-    turnDirection = 1;
-  }
-  if (keyIsDown(UP_ARROW)) {
-    velocityY -= acceleration;
-  }
-  if (keyIsDown(DOWN_ARROW)) {
-    velocityY += acceleration;
+  if (playerCanMove) {
+    if (keyIsDown(LEFT_ARROW)) {
+      velocityX -= acceleration;
+      turnDirection = -1;
+    }
+    if (keyIsDown(RIGHT_ARROW)) {
+      velocityX += acceleration;
+      turnDirection = 1;
+    }
+    if (keyIsDown(UP_ARROW)) {
+      velocityY -= acceleration;
+    }
+    if (keyIsDown(DOWN_ARROW)) {
+      velocityY += acceleration;
+    }
   }
 
   // Apply friction and limit speed
@@ -206,8 +219,25 @@ function drawApple(x, y) {
 }
 
 function keyPressed() {
-  // Advance dialog with X key
-  if (keyCode === 88 && currentDialog) { // 88 is X key
+  if (dialogChoices.length > 0) {
+    if (keyCode === LEFT_ARROW) {
+      selectedChoice = 0;
+    } else if (keyCode === RIGHT_ARROW) {
+      selectedChoice = 1;
+    } else if (keyCode === 88) { // X key
+      let response = selectedChoice === 0 ? 'friendly' : 'unfriendly';
+      currentDialog = DIALOG.pigeon.choices.question1.responses[response];
+      dialogChoices = [];
+      dialogTimer = dialogDuration;
+      setTimeout(() => {
+        playerCanMove = true;
+        currentDialog = null;
+      }, dialogDuration * 33); // Convert frames to ms
+    }
+    return false;
+  }
+  
+  if (keyCode === 88 && currentDialog) {
     dialogTimer = 0;
     currentDialog = null;
   }
@@ -338,25 +368,21 @@ function handlePigeon() {
   }
   
   if (pigeonActive) {
-    // Calculate direction to duck
     let dx = duckX - pigeonX;
     let dy = duckY - pigeonY;
     let dist = sqrt(dx * dx + dy * dy);
     
-    // Only move if not close to duck
-    if (dist > 75) {
+    if (dist > 75 && playerCanMove) {
       pigeonX += (dx / dist) * pigeonSpeed;
       pigeonY += (dy / dist) * pigeonSpeed;
-      
-      // Update pigeon direction based on movement
       pigeonDirection = dx > 0 ? 1 : -1;
     } else if (!currentDialog) {
-      // When pigeon reaches duck, show dialog
-      currentDialog = getRandomDialog('pigeon', 'greetings');
+      playerCanMove = false;
+      currentDialog = DIALOG.pigeon.choices.question1;
+      dialogChoices = currentDialog.options;
       dialogTimer = dialogDuration;
     }
     
-    // Draw pigeon shadow and pigeon
     drawShadow(pigeonX, pigeonY, 1);
     drawPigeon(pigeonX, pigeonY);
   }
@@ -367,38 +393,39 @@ function getRandomDialog(character, category) {
   return options[Math.floor(Math.random() * options.length)];
 }
 
-function drawDialog(x, y, dialogText) {
+function drawDialog(x, y, dialogText, choices = null) {
   push();
   textFont(historyFont);
   textSize(100);
-  textAlign(LEFT);
+  textAlign(CENTER);
   
   // Position at bottom of screen with padding
   let padding = 50;
-  let dialogY = height - 100;
+  let dialogY = height - 150;
   
-  // Calculate wrapped text
-  let words = dialogText.split(' ');
-  let line = '';
-  let lines = [];
-  let maxWidth = width - (padding * 2);
+  // Draw background rectangle with rounded corners
+  fill(255);
+  rect(padding, dialogY - 80, width - (padding * 2), 120, 12.5);
   
-  for (let word of words) {
-    let testLine = line + word + ' ';
-    if (textWidth(testLine) > maxWidth) {
-      lines.push(line);
-      line = word + ' ';
-    } else {
-      line = testLine;
-    }
-  }
-  lines.push(line);
-  
-  // Draw text lines
+  // Draw text
   fill(0);
-  lines.forEach((line, i) => {
-    text(line, padding, dialogY + (i * 80));
-  });
+  text(dialogText, width/2, dialogY);
+  
+  // Draw choices if they exist
+  if (choices) {
+    choices.forEach((choice, i) => {
+      let choiceY = dialogY + 80;
+      let choiceX = width/2 + (i === 0 ? -200 : 200);
+      
+      // Draw choice background
+      fill(i === selectedChoice ? '#E0E0E0' : '#FFFFFF');
+      rect(choiceX - 150, choiceY - 40, 300, 80, 12.5);
+      
+      // Draw choice text
+      fill(0);
+      text(choice, choiceX, choiceY);
+    });
+  }
   
   pop();
 }
