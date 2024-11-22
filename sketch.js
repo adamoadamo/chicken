@@ -99,32 +99,32 @@ function drawDuck(x, y) {
   rect(x + 12, y - 38, 25, 25); // Right wing
 
   // Head
-  push();
-  translate(x, y - 50); // Move to top of body
-  rect(-12.5, -25, 25, 25); // Head
+  rect(x - 12.5, y - 75, 25, 25); // Head
 
-  // Eye
-  fill(0);
+  // Eye and Beak
   if (turnDirection <= 0) {  // Looking left or center
+    // Eye
+    fill(0);
     if (eyeOpen) {
-      rect(-7.5, -17.5, 5, 5);
+      rect(x - 7.5, y - 67.5, 5, 5);
     } else {
-      rect(-7.5, -12.5, 5, 2.5);
+      rect(x - 7.5, y - 62.5, 5, 2.5);
     }
-    // Beak on left side
+    // Beak
     fill(beakColor);
-    rect(-12.5, -17.5, 12.5, 7.5);
+    rect(x - 12.5, y - 67.5, 12.5, 7.5);
   } else {  // Looking right
+    // Eye
+    fill(0);
     if (eyeOpen) {
-      rect(2.5, -17.5, 5, 5);
+      rect(x + 2.5, y - 67.5, 5, 5);
     } else {
-      rect(2.5, -12.5, 5, 2.5);
+      rect(x + 2.5, y - 62.5, 5, 2.5);
     }
-    // Beak on right side
+    // Beak
     fill(beakColor);
-    rect(0, -17.5, 12.5, 7.5);
+    rect(x, y - 67.5, 12.5, 7.5);
   }
-  pop();
 
   // Legs
   fill(0);
