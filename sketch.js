@@ -29,8 +29,8 @@ let maxSpeed = 12;
 let apples = [{x: 400, y: 400}]; // Start with one apple
 let maxApples = 1;               // Will increase as score goes up
 let grassBlades = [];
-let windAngle = PI/4;
-let windSpeed = 0.005;
+let windAngle = 0;
+let windSpeed = 0.02;
 let grassHeight = 25; // Half of duck height (50)
 let grassColors = ['#2E8B57'];
 
@@ -284,10 +284,9 @@ class GrassBlade {
     // Draw main grass blade
     rect(this.x, this.baseY, this.width, this.height - 6.25);
     
-    // Draw swaying top section
-    let windX = cos(windAngle) * 6.25;
-    let windY = sin(windAngle) * 6.25;
-    rect(this.x + windX, this.baseY + windY, this.width, 6.25);
+    // Draw swaying top section with simpler wind
+    let windOffset = sin(windAngle) * 6.25;
+    rect(this.x + windOffset, this.baseY, this.width, 6.25);
   }
 
   isInFrontOfDuck(duckX, duckY) {
