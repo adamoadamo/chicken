@@ -177,7 +177,7 @@ function draw() {
   textSize(100);
   textAlign(LEFT, TOP);
   fill(0);
-  text(score, 20, -30);
+  text(score, 20, -10);
 
   // Handle dialog display
   if (currentDialog && dialogTimer > 0) {
