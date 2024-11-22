@@ -1,5 +1,6 @@
 import DIALOG from './dialog.js';
-import Pigeon from './pigeon.js';
+import Pigeon from './entities/pigeon.js';
+import GrassBlade from './entities/GrassBlade.js';
 let duckColor = '#FFFFFF';
 let duckX = 400;
 let duckY = 400;
@@ -283,41 +284,5 @@ function drawAppleShadow(x, y) {
   fill(0, 0, 0, 50); // Semi-transparent black
   rect(x - 25, y + 12.5, 50, 12.5); // Base shadow
   rect(x - 12.5, y + 6.25, 25, 6.25); // Top shadow
-}
-
-class GrassBlade {
-  constructor(x, y) {
-    this.x = x + random(-6.25, 6.25);
-    this.baseY = y + random(-12.5, 12.5);
-    this.height = random([12.5, 18.75, 25, 31.25]);
-    this.width = 6.25;
-    this.color = '#2E8B57';
-  }
-  
-  draw() {
-    fill(this.color);
-    // Draw main grass blade
-    rect(this.x, this.baseY, this.width, this.height - 6.25);
-    
-    // Simple 8-bit style movement
-    let offset = round(cos(windAngle)) * 6.25;
-    rect(this.x + offset, this.baseY, this.width, 6.25);
-  }
-
-  isInFrontOfDuck(duckX, duckY) {
-    return (
-      Math.abs(this.x - duckX) < 18.75 &&
-      this.baseY > duckY - 6.25 &&
-      this.baseY < duckY + 18.75
-    );
-  }
-
-  isInFrontOfApple(appleX, appleY) {
-    return (
-      Math.abs(this.x - appleX) < 18.75 &&
-      this.baseY > appleY - 6.25 &&
-      this.baseY < appleY + 18.75
-    );
-  }
 }
 
