@@ -66,6 +66,42 @@ function setup() {
 function draw() {
   background('#3CB371');
   
+  // Handle movement
+  if (keyIsDown(65)) { // A key
+    velocityX -= acceleration;
+    turnDirection = -1;
+  }
+  if (keyIsDown(68)) { // D key
+    velocityX += acceleration;
+    turnDirection = 1;
+  }
+  if (keyIsDown(87)) { // W key
+    velocityY -= acceleration;
+  }
+  if (keyIsDown(83)) { // S key
+    velocityY += acceleration;
+  }
+
+  // Apply friction and limit speed
+  velocityX *= friction;
+  velocityY *= friction;
+  velocityX = constrain(velocityX, -maxSpeed, maxSpeed);
+  velocityY = constrain(velocityY, -maxSpeed, maxSpeed);
+
+  // Update position
+  duckX += velocityX;
+  duckY += velocityY;
+
+  // Keep duck within canvas
+  duckX = constrain(duckX, 50, width - 50);
+  duckY = constrain(duckY, 50, height - 50);
+
+  // Handle jumping
+  handleJump();
+  
+  // Check for apple collection
+  checkCollision();
+
   // Draw ALL grass first
   windAngle += windSpeed;
   grassBlades.forEach(blade => {
@@ -94,10 +130,8 @@ function draw() {
   textFont(historyFont);
   textSize(200);
   textAlign(LEFT, TOP);
-  fill(255); // White text
-  text(score, 20, 20);
-  fill(0); // Black outline
-  text(score, 22, 22);
+  fill(0);
+  text(score, 20, -30);
 }
 
 function drawDuck(x, y) {
