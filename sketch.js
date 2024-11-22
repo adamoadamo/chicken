@@ -101,10 +101,9 @@ function drawDuck(x, y) {
   // Head
   push();
   translate(x, y - 50); // Move to top of body
-  rotate(radians(headTurnAngle));
   rect(-12.5, -25, 25, 25); // Head
 
-  // Eye (switches sides based on turn direction)
+  // Eye
   fill(0);
   if (turnDirection <= 0) {  // Looking left or center
     if (eyeOpen) {
