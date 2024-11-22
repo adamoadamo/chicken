@@ -104,6 +104,8 @@ function drawChicken(x, y) {
   rotate(radians(headTurnAngle));
   rect(-12.5, -25, 25, 25); // Head
 
+
+  
   // Eye
   fill(0);
   if (eyeOpen) {
