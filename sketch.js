@@ -56,7 +56,7 @@ function drawChicken(x, y) {
 
   // Head
   push(); // Save the current transformation state
-  translate(x, y - 25); // Move to the neck position
+  translate(x, y - 10); // Move to the neck position
   rotate(radians(headTurnAngle)); // Rotate the head around the neck
   rect(-5, -15, 10, 10); // Draw the head
 
