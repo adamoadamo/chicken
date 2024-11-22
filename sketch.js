@@ -30,12 +30,12 @@ let apples = [{x: 400, y: 400}]; // Start with one apple
 let maxApples = 1;               // Will increase as score goes up
 let grassBlades = [];
 let windAngle = 0;
-let windSpeed = 0.02;
+let windSpeed = 0.03;
 let grassHeight = 25; // Half of duck height (50)
 let grassColors = ['#2E8B57'];
 
 function preload() {
-  historyFont = loadFont('History-Seven.otf');
+  historyFont = loadFont('m3x6.ttf');
 }
 
 function setup() {
@@ -277,6 +277,7 @@ class GrassBlade {
     this.height = random([12.5, 18.75, 25, 31.25]);
     this.width = 6.25;
     this.color = '#2E8B57';
+    this.phase = x / width * TWO_PI;
   }
   
   draw() {
@@ -284,8 +285,8 @@ class GrassBlade {
     // Draw main grass blade
     rect(this.x, this.baseY, this.width, this.height - 6.25);
     
-    // Draw swaying top section with simpler wind
-    let windOffset = sin(windAngle) * 6.25;
+    // Draw swaying top section
+    let windOffset = sin(windAngle + this.phase) * 6.25;
     rect(this.x + windOffset, this.baseY, this.width, 6.25);
   }
 
