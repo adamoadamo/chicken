@@ -63,13 +63,6 @@ const DIALOG = {
         }
       }
     }
-  },
-  duck: {
-    collecting: [
-      "Yum!",
-      "Another one!",
-      "Delicious!"
-    ]
   }
 };
 
@@ -224,43 +217,37 @@ function drawApple(x, y) {
 }
 
 function keyPressed() {
-  if (currentDialog) {
+  if (dialogState.current === 'choices') {
+    if (keyCode === UP_ARROW) {
+      selectedChoice = (selectedChoice - 1 + dialogChoices.length) % dialogChoices.length;
+      return false;
+    } else if (keyCode === DOWN_ARROW) {
+      selectedChoice = (selectedChoice + 1) % dialogChoices.length;
+      return false;
+    } else if (keyCode === 88) { // X key
+      let response = selectedChoice === 0 ? 'friendly' : 'unfriendly';
+      dialogState.current = 'response';
+      currentDialog = [DIALOG.pigeon.choices.question1.responses[response]];
+      dialogChoices = [];
+      dialogTimer = dialogDuration;
+      currentDialogIndex = 0;
+      return false;
+    }
+  } else if (currentDialog) {
     if (keyCode === 88) { // X key
       switch(dialogState.current) {
         case 'greeting':
-          if (currentDialogIndex < currentDialog.length - 1) {
-            currentDialogIndex++;
-          } else {
-            dialogState.current = 'choices';
-            dialogChoices = DIALOG.pigeon.choices.question1.options;
-            currentDialogIndex = 0;
-          }
-          break;
-          
-        case 'choices':
-          let response = selectedChoice === 0 ? 'friendly' : 'unfriendly';
-          dialogState.current = 'response';
-          currentDialog = DIALOG.pigeon.choices.question1.responses[response];
-          dialogChoices = [];
-          dialogTimer = dialogDuration;
+          dialogState.current = 'choices';
+          dialogChoices = DIALOG.pigeon.choices.question1.options;
           currentDialogIndex = 0;
+          currentDialog = null;
+          selectedChoice = 0; // Reset selection
           break;
-          
         case 'response':
-          if (currentDialogIndex < currentDialog.length - 1) {
-            currentDialogIndex++;
-          } else {
-            currentDialog = null;
-            dialogState.current = 'none';
-            playerCanMove = true;
-          }
+          currentDialog = null;
+          dialogState.current = 'none';
+          playerCanMove = true;
           break;
-      }
-    } else if (dialogState.current === 'choices') {
-      if (keyCode === LEFT_ARROW) {
-        selectedChoice = 0;
-      } else if (keyCode === RIGHT_ARROW) {
-        selectedChoice = 1;
       }
     }
     return false;
@@ -367,7 +354,7 @@ function drawPigeon(x, y) {
 }
 
 function handlePigeon() {
-  if (score === 5 && !pigeonActive) {
+  if (score >= 1 && !pigeonActive) {
     pigeonActive = true;
     // Choose random side to enter from
     let side = floor(random(4));
@@ -423,24 +410,34 @@ function drawDialog(x, y, dialogText) {
   textFont(historyFont);
   textSize(100);
   textAlign(CENTER);
-  
-  // Position dialog box in center of screen
+
+  // Calculate text wrapping and positioning
   let padding = 50;
-  let boxWidth = width - (padding * 2);
-  let boxHeight = 200;
-  let boxY = height/2 - boxHeight/2;
-  
-  // Draw background rectangle with rounded corners
-  fill(255);
-  rect(padding, boxY, boxWidth, boxHeight, 12.5);
-  
-  // Draw current line of text centered in box
+  let maxWidth = width - (padding * 2);
+  let words = dialogText[currentDialogIndex].split(' ');
+  let line = '';
+  let lines = [];
+
+  for (let word of words) {
+    let testLine = line + word + ' ';
+    if (textWidth(testLine) > maxWidth) {
+      lines.push(line);
+      line = word + ' ';
+    } else {
+      line = testLine;
+    }
+  }
+  lines.push(line);
+
+  // Draw text centered in the window
   fill(0);
   let lineHeight = 80;
-  let startY = boxY + (boxHeight - lineHeight)/2 + lineHeight;
-  
-  text(dialogText[currentDialogIndex], width/2, startY);
-  
+  let startY = height / 2 - (lines.length * lineHeight) / 2 + lineHeight;
+
+  lines.forEach((line, i) => {
+    text(line.trim(), width / 2, startY + (i * lineHeight));
+  });
+
   pop();
 }
 
@@ -449,24 +446,18 @@ function drawChoices() {
   textFont(historyFont);
   textSize(100);
   textAlign(CENTER);
-  
+
   let padding = 50;
-  let boxWidth = 300;
-  let boxHeight = 100;
-  let spacing = 100;
-  
+  let choiceYStart = height / 2 + 100; // Start position for choices
+
   dialogChoices.forEach((choice, i) => {
-    let choiceX = width/2 + (i === 0 ? -200 : 200);
-    let choiceY = height/2 + 150;
-    
-    // Draw choice background
-    fill(i === selectedChoice ? '#E0E0E0' : '#FFFFFF');
-    rect(choiceX - boxWidth/2, choiceY - boxHeight/2, boxWidth, boxHeight, 12.5);
-    
-    // Draw choice text
-    fill(0);
-    text(choice, choiceX, choiceY + 10);
+    let choiceX = width / 2;
+    let choiceY = choiceYStart + i * 120; // Stack choices vertically with spacing
+
+    // Change text color if selected
+    fill(i === selectedChoice ? '#E0E0E0' : '#000000');
+    text(choice, choiceX, choiceY);
   });
-  
+
   pop();
 }
