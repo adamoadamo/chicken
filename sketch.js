@@ -447,7 +447,7 @@ function getRandomDialog(character, category) {
   return options[Math.floor(Math.random() * options.length)];
 }
 
-function drawDialog(x, y, text) {
+function drawDialog(x, y, dialogText) {
   push();
   textFont(historyFont);
   textSize(100); // Half of score font size (200)
@@ -458,6 +458,6 @@ function drawDialog(x, y, text) {
   
   // Draw text directly without background
   fill(0); // Black text
-  text(text, width/2, dialogY);
+  text(dialogText, width/2, dialogY);
   pop();
 }
