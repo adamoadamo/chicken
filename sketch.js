@@ -1,3 +1,6 @@
+import DIALOG from './dialog.js';
+import Pigeon from './entities/Pigeon.js';
+
 let duckColor = '#FFFFFF';
 let duckX = 400;
 let duckY = 400;
@@ -33,11 +36,7 @@ let windAngle = 0;
 let windSpeed = 0.01;
 let grassHeight = 25; // Half of duck height (50)
 let grassColors = ['#2E8B57'];
-let pigeonX = -50;
-let pigeonY = -50;
-let pigeonActive = false;
-let pigeonSpeed = 3;
-let pigeonDirection = 0; // -1 left, 0 center, 1 right
+let pigeon = new Pigeon();
 
 function preload() {
   historyFont = loadFont('m3x6.ttf');
@@ -59,9 +58,9 @@ function setup() {
   appleY = random(100, height - 100);
 
   // Initialize grass blades with random spacing
-  for (let y = 0; y < height; y += 25) { // Closer vertical spacing
-    for (let x = 0; x < width + 6.25; x += 18.75) { // Variable horizontal spacing
-      if (random() < 0.7) { // 70% chance to place grass
+  for (let y = 0; y < height; y += 50) { // Doubled vertical spacing
+    for (let x = 0; x < width + 6.25; x += 37.5) { // Doubled horizontal spacing
+      if (random() < 0.7) {
         grassBlades.push(new GrassBlade(x, y));
       }
     }
@@ -147,8 +146,17 @@ function draw() {
   });
 
   // Handle pigeon
-  handlePigeon();
-  
+  pigeon.update(duckX, duckY);
+  pigeon.draw();
+
+  if (pigeon.showDialog) {
+    textFont(historyFont);
+    textSize(50);
+    textAlign(CENTER, BOTTOM);
+    fill(0);
+    text(DIALOG.pigeon.greeting, width/2, height - 50);
+  }
+
   // Draw score last (on top of everything)
   textFont(historyFont);
   textSize(200);
@@ -311,94 +319,5 @@ class GrassBlade {
       this.baseY > appleY - 6.25 &&
       this.baseY < appleY + 18.75
     );
-  }
-}
-
-function drawPigeon(x, y) {
-  fill('#808080'); // Gray base color
-  
-  // Body (same size as duck)
-  rect(x - (25 * duckSize), y - (50 * duckSize), 50 * duckSize, 50 * duckSize);
-  
-  // Wings (slightly different shape than duck)
-  rect(x - (37.5 * duckSize), y - (43.75 * duckSize), 31.25 * duckSize, 31.25 * duckSize); // Left wing
-  rect(x + (6.25 * duckSize), y - (43.75 * duckSize), 31.25 * duckSize, 31.25 * duckSize); // Right wing
-  
-  // Neck (shorter than duck)
-  rect(x - (12.5 * duckSize), y - (62.5 * duckSize), 25 * duckSize, 12.5 * duckSize);
-  
-  // Head (rounder than duck)
-  rect(x - (18.75 * duckSize), y - (75 * duckSize), 37.5 * duckSize, 18.75 * duckSize);
-  
-  // Eye and Beak
-  if (turnDirection <= 0) {  // Looking left or center
-    // Beak (smaller than duck)
-    fill('#000000'); // Black beak
-    rect(x - (12.5 * duckSize), y - (68.75 * duckSize), 6.25 * duckSize, 6.25 * duckSize);
-    // Eye
-    fill('#FF0000'); // Red eye
-    rect(x, y - (68.75 * duckSize), 6.25 * duckSize, 6.25 * duckSize);
-  } else {  // Looking right
-    // Beak
-    fill('#000000');
-    rect(x + (6.25 * duckSize), y - (68.75 * duckSize), 6.25 * duckSize, 6.25 * duckSize);
-    // Eye
-    fill('#FF0000');
-    rect(x - (6.25 * duckSize), y - (68.75 * duckSize), 6.25 * duckSize, 6.25 * duckSize);
-  }
-  
-  // Neck pattern (characteristic pigeon iridescence)
-  fill('#4B0082'); // Indigo
-  rect(x - (6.25 * duckSize), y - (62.5 * duckSize), 12.5 * duckSize, 6.25 * duckSize);
-  
-  // Legs (thinner than duck)
-  fill('#FF6B6B'); // Pink legs
-  rect(x - 12.5, y, 6.25, 12.5);
-  rect(x + 6.25, y, 6.25, 12.5);
-}
-
-function handlePigeon() {
-  if (score === 20 && !pigeonActive) {
-    pigeonActive = true;
-    // Choose random side to enter from
-    let side = floor(random(4));
-    switch(side) {
-      case 0: // top
-        pigeonX = random(width);
-        pigeonY = -50;
-        break;
-      case 1: // right
-        pigeonX = width + 50;
-        pigeonY = random(height);
-        break;
-      case 2: // bottom
-        pigeonX = random(width);
-        pigeonY = height + 50;
-        break;
-      case 3: // left
-        pigeonX = -50;
-        pigeonY = random(height);
-        break;
-    }
-  }
-  
-  if (pigeonActive) {
-    // Calculate direction to duck
-    let dx = duckX - pigeonX;
-    let dy = duckY - pigeonY;
-    let dist = sqrt(dx * dx + dy * dy);
-    
-    // Only move if not close to duck
-    if (dist > 75) {
-      pigeonX += (dx / dist) * pigeonSpeed;
-      pigeonY += (dy / dist) * pigeonSpeed;
-      
-      // Update pigeon direction based on movement
-      pigeonDirection = dx > 0 ? 1 : -1;
-    }
-    
-    // Draw pigeon shadow and pigeon
-    drawShadow(pigeonX, pigeonY, 1);
-    drawPigeon(pigeonX, pigeonY);
   }
 }
