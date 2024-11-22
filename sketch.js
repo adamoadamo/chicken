@@ -39,6 +39,10 @@ let dialogDuration = 90; // 3 seconds at 30 fps
 let dialogChoices = [];
 let selectedChoice = 0;
 let playerCanMove = true;
+let dialogState = {
+  current: 'none', // none, greeting, choices, response
+  sequence: ['greeting', 'choices', 'response']
+};
 
 const DIALOG = {
   pigeon: {
@@ -219,27 +223,29 @@ function drawApple(x, y) {
 }
 
 function keyPressed() {
-  if (dialogChoices.length > 0) {
-    if (keyCode === LEFT_ARROW) {
-      selectedChoice = 0;
-    } else if (keyCode === RIGHT_ARROW) {
-      selectedChoice = 1;
-    } else if (keyCode === 88) { // X key
-      let response = selectedChoice === 0 ? 'friendly' : 'unfriendly';
-      currentDialog = DIALOG.pigeon.choices.question1.responses[response];
-      dialogChoices = [];
-      dialogTimer = dialogDuration;
-      setTimeout(() => {
-        playerCanMove = true;
+  if (currentDialog) {
+    if (keyCode === 88) { // X key
+      if (dialogState.current === 'greeting') {
+        dialogState.current = 'choices';
+        dialogChoices = DIALOG.pigeon.choices.question1.options;
+      } else if (dialogState.current === 'choices') {
+        let response = selectedChoice === 0 ? 'friendly' : 'unfriendly';
+        dialogState.current = 'response';
+        currentDialog = DIALOG.pigeon.choices.question1.responses[response];
+        dialogChoices = [];
+        dialogTimer = dialogDuration;
+        setTimeout(() => {
+          playerCanMove = true;
+          currentDialog = null;
+          dialogState.current = 'none';
+        }, dialogDuration * 33);
+      } else if (dialogState.current === 'response') {
+        dialogTimer = 0;
         currentDialog = null;
-      }, dialogDuration * 33); // Convert frames to ms
+        dialogState.current = 'none';
+      }
     }
     return false;
-  }
-  
-  if (keyCode === 88 && currentDialog) {
-    dialogTimer = 0;
-    currentDialog = null;
   }
   return false;
 }
@@ -378,8 +384,8 @@ function handlePigeon() {
       pigeonDirection = dx > 0 ? 1 : -1;
     } else if (!currentDialog) {
       playerCanMove = false;
+      dialogState.current = 'greeting';
       currentDialog = DIALOG.pigeon.choices.question1.prompt;
-      dialogChoices = DIALOG.pigeon.choices.question1.options;
       dialogTimer = dialogDuration;
     }
     
@@ -393,35 +399,58 @@ function getRandomDialog(character, category) {
   return options[Math.floor(Math.random() * options.length)];
 }
 
-function drawDialog(x, y, dialogText, choices = null) {
+function drawDialog(x, y, dialogText) {
   push();
   textFont(historyFont);
   textSize(100);
   textAlign(CENTER);
   
-  // Position at bottom of screen with padding
+  // Position dialog box in center of screen
   let padding = 50;
-  let dialogY = height - 150;
+  let boxWidth = width - (padding * 2);
+  let boxHeight = 200;
+  let boxY = height/2 - boxHeight/2;
   
   // Draw background rectangle with rounded corners
   fill(255);
-  rect(padding, dialogY - 80, width - (padding * 2), 120, 12.5);
+  rect(padding, boxY, boxWidth, boxHeight, 12.5);
   
-  // Draw text
+  // Calculate text wrapping
+  let words = dialogText.split(' ');
+  let line = '';
+  let lines = [];
+  let maxWidth = boxWidth - padding;
+  
+  for (let word of words) {
+    let testLine = line + word + ' ';
+    if (textWidth(testLine) > maxWidth) {
+      lines.push(line);
+      line = word + ' ';
+    } else {
+      line = testLine;
+    }
+  }
+  lines.push(line);
+  
+  // Draw text centered in box
   fill(0);
-  text(dialogText, width/2, dialogY);
+  let lineHeight = 80;
+  let totalTextHeight = lines.length * lineHeight;
+  let startY = boxY + (boxHeight - totalTextHeight)/2 + lineHeight;
   
-  // Draw choices if they exist
-  if (dialogChoices.length > 0) {
-    let choiceY = dialogY + 80;
+  lines.forEach((line, i) => {
+    text(line.trim(), width/2, startY + (i * lineHeight));
+  });
+  
+  // Draw choices if in choice state
+  if (dialogState.current === 'choices' && dialogChoices.length > 0) {
+    let choiceY = boxY + boxHeight + 50;
     dialogChoices.forEach((choice, i) => {
       let choiceX = width/2 + (i === 0 ? -200 : 200);
       
-      // Draw choice background
       fill(i === selectedChoice ? '#E0E0E0' : '#FFFFFF');
       rect(choiceX - 150, choiceY - 40, 300, 80, 12.5);
       
-      // Draw choice text
       fill(0);
       text(choice, choiceX, choiceY);
     });
