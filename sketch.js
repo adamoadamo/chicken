@@ -231,15 +231,13 @@ class GrassBlade {
   }
   
   draw() {
-    let windOffset = sin(windAngle + this.phase) * 6.25;
     fill(this.color);
-    
     // Draw main grass blade
-    rect(this.x, this.baseY, this.width, this.height);
+    rect(this.x, this.baseY, this.width, this.height - 6.25);
     
-    // Draw swaying top pixels
-    let topPixels = min(12.5, this.height);
-    rect(this.x + windOffset, this.baseY, this.width, topPixels);
+    // Draw swaying top section
+    let windOffset = round(sin(windAngle + this.phase)) * 6.25;
+    rect(this.x + windOffset, this.baseY, this.width, 6.25);
   }
 
   isInFrontOfDuck(duckX, duckY) {
