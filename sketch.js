@@ -85,7 +85,20 @@ function draw() {
   handleJump();
   drawShadow(duckX, duckY, duckSize);
 
-  // Draw the duck at its current position
+  // Draw all apple shadows first
+  apples.forEach(apple => {
+    drawAppleShadow(apple.x, apple.y);
+  });
+
+  // Draw all apples
+  apples.forEach(apple => {
+    drawApple(apple.x, apple.y);
+  });
+
+  // Draw duck shadow
+  drawShadow(duckX, duckY, duckSize);
+
+  // Draw the duck last so it appears on top
   drawDuck(duckX, duckY + jumpHeight);
 
   // Blinking logic
@@ -106,11 +119,6 @@ function draw() {
 
   // Update head rotation angle
   headTurnAngle = turnDirection * 10;
-
-  // Draw all apples
-  apples.forEach(apple => {
-    drawApple(apple.x, apple.y);
-  });
 
   // Check for collision
   checkCollision();
@@ -197,23 +205,22 @@ function keyPressed() {
 }
 
 function checkCollision() {
-  // Check each apple for collision
-  for (let i = apples.length - 1; i >= 0; i--) {
-    let d = dist(duckX, duckY - 25, apples[i].x, apples[i].y);
-    if (d < 75) {
-      score++;
-      // Remove eaten apple
-      apples.splice(i, 1);
-      
-      // Increase max apples every 5 points
-      maxApples = 1 + Math.floor(score / 5);
-      
-      // Add new apples until we reach maxApples
-      while (apples.length < maxApples) {
-        apples.push({
-          x: random(100, width - 100),
-          y: random(100, height - 100)
-        });
+  // Only check collisions if not jumping
+  if (!isJumping) {
+    for (let i = apples.length - 1; i >= 0; i--) {
+      let d = dist(duckX, duckY - 25, apples[i].x, apples[i].y);
+      if (d < 75) {
+        score++;
+        apples.splice(i, 1);
+        
+        maxApples = 1 + Math.floor(score / 5);
+        
+        while (apples.length < maxApples) {
+          apples.push({
+            x: random(100, width - 100),
+            y: random(100, height - 100)
+          });
+        }
       }
     }
   }
@@ -245,4 +252,9 @@ function drawShadow(x, y, size) {
   fill(0, 0, 0, 50); // Semi-transparent black
   let shadowSize = map(jumpHeight, -100, 0, 0.5, 1); // Shadow gets smaller as duck jumps
   rect(x - (25 * size), y + 5, 50 * size * shadowSize, 12.5 * shadowSize);
+}
+
+function drawAppleShadow(x, y) {
+  fill(0, 0, 0, 50); // Semi-transparent black
+  rect(x - 20, y + 5, 40, 10);
 }
