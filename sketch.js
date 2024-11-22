@@ -157,7 +157,7 @@ function draw() {
     if (currentDialog) {
       drawDialog(pigeonX, pigeonY, currentDialog);
     } else if (dialogState.current === 'choices') {
-      drawDialog(pigeonX, pigeonY, '');  // Draw empty dialog box for choices
+      drawChoices();
     }
   }
 }
@@ -390,12 +390,11 @@ function handlePigeon() {
       pigeonX += (dx / dist) * pigeonSpeed;
       pigeonY += (dy / dist) * pigeonSpeed;
       pigeonDirection = dx > 0 ? 1 : -1;
-    } else if (!currentDialog) {
+    } else if (!currentDialog && dialogState.current === 'none') {
       playerCanMove = false;
       dialogState.current = 'greeting';
-      currentDialog = "There are so many apples. I'm so hungry.";
+      currentDialog = DIALOG.pigeon.choices.question1.prompt;
       dialogTimer = dialogDuration;
-      dialogChoices = [];
     }
     
     drawShadow(pigeonX, pigeonY, 1);
@@ -424,46 +423,36 @@ function drawDialog(x, y, dialogText) {
   fill(255);
   rect(padding, boxY, boxWidth, boxHeight, 12.5);
   
-  // Calculate text wrapping
-  let words = dialogText.split(' ');
-  let line = '';
-  let lines = [];
-  let maxWidth = boxWidth - padding;
-  
-  for (let word of words) {
-    let testLine = line + word + ' ';
-    if (textWidth(testLine) > maxWidth) {
-      lines.push(line);
-      line = word + ' ';
-    } else {
-      line = testLine;
-    }
-  }
-  lines.push(line);
-  
   // Draw text centered in box
   fill(0);
-  let lineHeight = 80;
-  let totalTextHeight = lines.length * lineHeight;
-  let startY = boxY + (boxHeight - totalTextHeight)/2 + lineHeight;
+  text(dialogText, width/2, height/2);
   
-  lines.forEach((line, i) => {
-    text(line.trim(), width/2, startY + (i * lineHeight));
+  pop();
+}
+
+function drawChoices() {
+  push();
+  textFont(historyFont);
+  textSize(100);
+  textAlign(CENTER);
+  
+  let padding = 50;
+  let boxWidth = 300;
+  let boxHeight = 100;
+  let spacing = 100;
+  
+  dialogChoices.forEach((choice, i) => {
+    let choiceX = width/2 + (i === 0 ? -200 : 200);
+    let choiceY = height/2 + 150;
+    
+    // Draw choice background
+    fill(i === selectedChoice ? '#E0E0E0' : '#FFFFFF');
+    rect(choiceX - boxWidth/2, choiceY - boxHeight/2, boxWidth, boxHeight, 12.5);
+    
+    // Draw choice text
+    fill(0);
+    text(choice, choiceX, choiceY + 10);
   });
-  
-  // Only draw choices if we're in the choices state
-  if (dialogState.current === 'choices' && dialogChoices.length > 0) {
-    let choiceY = boxY + boxHeight + 50;
-    dialogChoices.forEach((choice, i) => {
-      let choiceX = width/2 + (i === 0 ? -200 : 200);
-      
-      fill(i === selectedChoice ? '#E0E0E0' : '#FFFFFF');
-      rect(choiceX - 150, choiceY - 40, 300, 80, 12.5);
-      
-      fill(0);
-      text(choice, choiceX, choiceY);
-    });
-  }
   
   pop();
 }
