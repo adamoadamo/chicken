@@ -153,24 +153,20 @@ function drawDuck(x, y) {
   if (turnDirection <= 0) {  // Looking left or center
     // Beak first
     fill(beakColor);
-    rect(x - (12.5 * duckSize), y - (67.5 * duckSize), 12.5 * duckSize, 7.5 * duckSize);
+    rect(x - (12.5 * duckSize), y - (75 * duckSize), 12.5 * duckSize, 12.5 * duckSize);
     // Eye to the right of beak
     fill(0);
     if (eyeOpen) {
-      rect(x + (2.5 * duckSize), y - (67.5 * duckSize), 5 * duckSize, 5 * duckSize);
-    } else {
-      rect(x + (2.5 * duckSize), y - (62.5 * duckSize), 5 * duckSize, 2.5 * duckSize);
+      rect(x + (0 * duckSize), y - (75 * duckSize), 12.5 * duckSize, 12.5 * duckSize);
     }
   } else {  // Looking right
     // Beak first
     fill(beakColor);
-    rect(x, y - (67.5 * duckSize), 12.5 * duckSize, 7.5 * duckSize);
+    rect(x, y - (75 * duckSize), 12.5 * duckSize, 12.5 * duckSize);
     // Eye to the left of beak
     fill(0);
     if (eyeOpen) {
-      rect(x - (7.5 * duckSize), y - (67.5 * duckSize), 5 * duckSize, 5 * duckSize);
-    } else {
-      rect(x - (7.5 * duckSize), y - (62.5 * duckSize), 5 * duckSize, 2.5 * duckSize);
+      rect(x - (12.5 * duckSize), y - (75 * duckSize), 12.5 * duckSize, 12.5 * duckSize);
     }
   }
 
