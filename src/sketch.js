@@ -39,7 +39,7 @@ let windAngle = 0;
 let windSpeed = 0.01;
 let grassHeight = 25; // Half of duck height (50)
 let grassColors = ['#2E8B57'];
-let pigeon = new Pigeon();
+let pigeon;
 
 function preload() {
   historyFont = loadFont('m3x6.ttf');
@@ -50,7 +50,9 @@ function setup() {
   noSmooth();
   noStroke();
   frameRate(30);
-
+  
+  pigeon = new Pigeon();
+  
   // Initialize blink and turn intervals
   blinkInterval = random(60, 180);
   turnInterval = random(120, 240);
