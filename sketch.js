@@ -30,7 +30,7 @@ let apples = [{x: 400, y: 400}]; // Start with one apple
 let maxApples = 1;               // Will increase as score goes up
 let grassBlades = [];
 let windAngle = 0;
-let windSpeed = 0.1;
+let windSpeed = 0.02;
 let grassHeight = 25; // Half of duck height (50)
 let grassColors = ['#228B22', '#2E8B57', '#3CB371']; // Different shades of green
 
@@ -64,99 +64,40 @@ function setup() {
 }
 
 function draw() {
-  background('#3CB371'); // Green background
+  background('#3CB371');
   
-  // Handle WASD movement with acceleration
-  if (keyIsDown(87)) { // W key
-    velocityY -= acceleration;
-  }
-  if (keyIsDown(83)) { // S key
-    velocityY += acceleration;
-  }
-  if (keyIsDown(65)) { // A key
-    velocityX -= acceleration;
-  }
-  if (keyIsDown(68)) { // D key
-    velocityX += acceleration;
-  }
-
-  // Apply friction
-  velocityX *= friction;
-  velocityY *= friction;
-
-  // Limit max speed
-  velocityX = constrain(velocityX, -maxSpeed, maxSpeed);
-  velocityY = constrain(velocityY, -maxSpeed, maxSpeed);
-
-  // Update position with boundaries
-  duckX = constrain(duckX + velocityX, 50 * duckSize, width - 50 * duckSize);
-  duckY = constrain(duckY + velocityY, 75 * duckSize, height - 25 * duckSize);
-
-  // Handle jumping and shadow
-  handleJump();
-  drawShadow(duckX, duckY, duckSize);
-
-  // Draw all apple shadows first
-  apples.forEach(apple => {
-    drawAppleShadow(apple.x, apple.y);
-  });
-
-  // Draw all apples
-  apples.forEach(apple => {
-    drawApple(apple.x, apple.y);
-  });
-
-  // Draw duck shadow and duck last (on top)
-  drawShadow(duckX, duckY, duckSize);
-  drawDuck(duckX, duckY + jumpHeight);
-
-  // Head turning logic
-  turnTimer++;
-  if (turnTimer >= turnInterval) {
-    turnDirection = floor(random(-1, 2));
-    turnTimer = 0;
-    turnInterval = random(120, 240);
-  }
-
-  // Update head rotation angle
-  headTurnAngle = turnDirection * 10;
-
-  // Check for collision
-  checkCollision();
-  
-  // Draw score
-  textFont(historyFont);
-  textSize(200);  // Doubled size
-  textAlign(LEFT, TOP);
-  fill(0);
-  text(score, 20, -30);  // Moved Y position from 20 to -30
-
-  // Update wind
+  // Draw ALL grass first
   windAngle += windSpeed;
-
-  // Draw ALL background grass
   grassBlades.forEach(blade => {
     if (!blade.isInFrontOfDuck(duckX, duckY)) {
       blade.draw();
     }
   });
 
-  // Draw apples and shadows
+  // Draw game elements
   apples.forEach(apple => {
     drawAppleShadow(apple.x, apple.y);
     drawApple(apple.x, apple.y);
   });
-
-  // Draw duck
+  
   drawShadow(duckX, duckY, duckSize);
   drawDuck(duckX, duckY + jumpHeight);
-
-  // Draw ONLY the grass that's directly in front of duck
+  
+  // Draw foreground grass
   grassBlades.forEach(blade => {
     if (blade.isInFrontOfDuck(duckX, duckY)) {
       blade.draw();
     }
   });
+
+  // Draw score last (on top of everything)
+  textFont(historyFont);
+  textSize(200);
+  textAlign(LEFT, TOP);
+  fill(255); // White text
+  text(score, 20, 20);
+  fill(0); // Black outline
+  text(score, 22, 22);
 }
 
 function drawDuck(x, y) {
@@ -281,26 +222,31 @@ function drawAppleShadow(x, y) {
 
 class GrassBlade {
   constructor(x, y) {
-    this.x = x + random(-6.25, 6.25); // Slight x position variation
-    this.baseY = y + random(-12.5, 12.5); // Slight y position variation
-    this.height = random([12.5, 18.75, 25, 31.25]); // More height variations
-    this.swayOffset = random([0, PI/2, PI, PI*1.5]);
+    this.x = x + random(-6.25, 6.25);
+    this.baseY = y + random(-12.5, 12.5);
+    this.height = random([12.5, 18.75, 25, 31.25]);
     this.width = 6.25;
     this.color = random(grassColors);
+    this.phase = x / width * TWO_PI; // Phase based on x position
   }
   
   draw() {
-    let sway = round(sin(windAngle + this.swayOffset) * 6.25 / 6.25) * 6.25;
+    let windOffset = sin(windAngle + this.phase) * 6.25;
     fill(this.color);
-    rect(this.x + sway, this.baseY, this.width, this.height);
+    
+    // Draw main grass blade
+    rect(this.x, this.baseY, this.width, this.height);
+    
+    // Draw swaying top pixels
+    let topPixels = min(12.5, this.height);
+    rect(this.x + windOffset, this.baseY, this.width, topPixels);
   }
 
   isInFrontOfDuck(duckX, duckY) {
-    // Only consider grass in front if it's within a small area in front of duck
     return (
-      Math.abs(this.x - duckX) < 25 && // Within duck width
-      this.baseY > duckY - 12.5 && // Just slightly behind duck's vertical center
-      this.baseY < duckY + 25 // Not too far in front
+      Math.abs(this.x - duckX) < 25 &&
+      this.baseY > duckY - 12.5 &&
+      this.baseY < duckY + 25
     );
   }
 }
