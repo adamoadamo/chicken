@@ -113,13 +113,28 @@ function draw() {
   // Draw game elements
   apples.forEach(apple => {
     drawAppleShadow(apple.x, apple.y);
+    
+    // Draw background grass for this apple
+    grassBlades.forEach(blade => {
+      if (!blade.isInFrontOfApple(apple.x, apple.y) && !blade.isInFrontOfDuck(duckX, duckY)) {
+        blade.draw();
+      }
+    });
+    
     drawApple(apple.x, apple.y);
+    
+    // Draw foreground grass for this apple
+    grassBlades.forEach(blade => {
+      if (blade.isInFrontOfApple(apple.x, apple.y)) {
+        blade.draw();
+      }
+    });
   });
   
   drawShadow(duckX, duckY, duckSize);
   drawDuck(duckX, duckY + jumpHeight);
   
-  // Draw foreground grass
+  // Draw foreground grass for duck
   grassBlades.forEach(blade => {
     if (blade.isInFrontOfDuck(duckX, duckY)) {
       blade.draw();
@@ -251,7 +266,8 @@ function drawShadow(x, y, size) {
 
 function drawAppleShadow(x, y) {
   fill(0, 0, 0, 50); // Semi-transparent black
-  rect(x - 25, y + 12.5, 50, 12.5); // Shadow matches apple width
+  rect(x - 25, y + 12.5, 50, 12.5); // Base shadow
+  rect(x - 12.5, y + 6.25, 25, 6.25); // Top shadow
 }
 
 class GrassBlade {
@@ -279,6 +295,14 @@ class GrassBlade {
       Math.abs(this.x - duckX) < 25 &&
       this.baseY > duckY - 12.5 &&
       this.baseY < duckY + 25
+    );
+  }
+
+  isInFrontOfApple(appleX, appleY) {
+    return (
+      Math.abs(this.x - appleX) < 25 &&
+      this.baseY > appleY - 12.5 &&
+      this.baseY < appleY + 25
     );
   }
 }
