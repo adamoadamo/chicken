@@ -305,3 +305,46 @@ class GrassBlade {
     );
   }
 }
+
+function drawPigeon(x, y) {
+  fill('#808080'); // Gray base color
+  
+  // Body (same size as duck)
+  rect(x - (25 * duckSize), y - (50 * duckSize), 50 * duckSize, 50 * duckSize);
+  
+  // Wings (slightly different shape than duck)
+  rect(x - (37.5 * duckSize), y - (43.75 * duckSize), 31.25 * duckSize, 31.25 * duckSize); // Left wing
+  rect(x + (6.25 * duckSize), y - (43.75 * duckSize), 31.25 * duckSize, 31.25 * duckSize); // Right wing
+  
+  // Neck (shorter than duck)
+  rect(x - (12.5 * duckSize), y - (62.5 * duckSize), 25 * duckSize, 12.5 * duckSize);
+  
+  // Head (rounder than duck)
+  rect(x - (18.75 * duckSize), y - (75 * duckSize), 37.5 * duckSize, 18.75 * duckSize);
+  
+  // Eye and Beak
+  if (turnDirection <= 0) {  // Looking left or center
+    // Beak (smaller than duck)
+    fill('#000000'); // Black beak
+    rect(x - (12.5 * duckSize), y - (68.75 * duckSize), 6.25 * duckSize, 6.25 * duckSize);
+    // Eye
+    fill('#FF0000'); // Red eye
+    rect(x, y - (68.75 * duckSize), 6.25 * duckSize, 6.25 * duckSize);
+  } else {  // Looking right
+    // Beak
+    fill('#000000');
+    rect(x + (6.25 * duckSize), y - (68.75 * duckSize), 6.25 * duckSize, 6.25 * duckSize);
+    // Eye
+    fill('#FF0000');
+    rect(x - (6.25 * duckSize), y - (68.75 * duckSize), 6.25 * duckSize, 6.25 * duckSize);
+  }
+  
+  // Neck pattern (characteristic pigeon iridescence)
+  fill('#4B0082'); // Indigo
+  rect(x - (6.25 * duckSize), y - (62.5 * duckSize), 12.5 * duckSize, 6.25 * duckSize);
+  
+  // Legs (thinner than duck)
+  fill('#FF6B6B'); // Pink legs
+  rect(x - 12.5, y, 6.25, 12.5);
+  rect(x + 6.25, y, 6.25, 12.5);
+}
