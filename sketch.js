@@ -224,10 +224,21 @@ function drawApple(x, y) {
 
 function keyPressed() {
   if (currentDialog) {
+    if (dialogState.current === 'choices') {
+      if (keyCode === LEFT_ARROW) {
+        selectedChoice = 0;
+        return false;
+      } else if (keyCode === RIGHT_ARROW) {
+        selectedChoice = 1;
+        return false;
+      }
+    }
+    
     if (keyCode === 88) { // X key
       if (dialogState.current === 'greeting') {
         dialogState.current = 'choices';
         dialogChoices = DIALOG.pigeon.choices.question1.options;
+        currentDialog = ''; // Clear the greeting text
       } else if (dialogState.current === 'choices') {
         let response = selectedChoice === 0 ? 'friendly' : 'unfriendly';
         dialogState.current = 'response';
@@ -442,7 +453,7 @@ function drawDialog(x, y, dialogText) {
     text(line.trim(), width/2, startY + (i * lineHeight));
   });
   
-  // Draw choices if in choice state
+  // Only draw choices if we're in the choices state
   if (dialogState.current === 'choices' && dialogChoices.length > 0) {
     let choiceY = boxY + boxHeight + 50;
     dialogChoices.forEach((choice, i) => {
