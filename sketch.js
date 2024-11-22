@@ -53,9 +53,11 @@ function setup() {
   appleX = random(100, width - 100);
   appleY = random(100, height - 100);
 
-  // Initialize grass blades across the width of the canvas
-  for (let x = 0; x < width + 6.25; x += 6.25) {
-    grassBlades.push(new GrassBlade(x));
+  // Initialize grass blades across the entire canvas
+  for (let y = 0; y < height; y += 31.25) { // Space rows by max grass height
+    for (let x = 0; x < width + 6.25; x += 6.25) {
+      grassBlades.push(new GrassBlade(x, y));
+    }
   }
 }
 
@@ -130,16 +132,16 @@ function draw() {
   // Update wind
   windAngle += windSpeed;
 
-  // Draw grass behind
+  // Draw all grass
   grassBlades.forEach(blade => {
     blade.draw();
   });
 
-  // Draw rest of scene (apples, duck, etc)
+  // Draw scene elements (apples, duck, etc)
 
-  // Draw some grass in front
+  // Draw some foreground grass
   grassBlades.forEach(blade => {
-    if (blade.height === 18.75 && random() < 0.3) { // Only shortest grass in front, 30% chance
+    if (blade.baseY > duckY && blade.height === 18.75 && random() < 0.2) {
       blade.draw();
     }
   });
@@ -266,9 +268,9 @@ function drawAppleShadow(x, y) {
 }
 
 class GrassBlade {
-  constructor(x) {
+  constructor(x, y) {
     this.x = x;
-    this.baseY = height;
+    this.baseY = y;
     this.height = random([18.75, 25, 31.25]); // Three possible heights in 6.25 increments
     this.swayOffset = random([0, PI/2, PI, PI*1.5]); // Four possible phases
     this.width = 6.25;
@@ -278,6 +280,6 @@ class GrassBlade {
   draw() {
     let sway = round(sin(windAngle + this.swayOffset) * 6.25 / 6.25) * 6.25; // Quantize to 6.25
     fill(this.color);
-    rect(this.x + sway, this.baseY - this.height, this.width, this.height);
+    rect(this.x + sway, this.baseY, this.width, this.height);
   }
 }
