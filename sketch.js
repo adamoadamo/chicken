@@ -393,7 +393,7 @@ function handlePigeon() {
     } else if (!currentDialog && dialogState.current === 'none') {
       playerCanMove = false;
       dialogState.current = 'greeting';
-      currentDialog = DIALOG.pigeon.choices.question1.prompt;
+      currentDialog = getRandomDialog('pigeon', 'greetings');
       dialogTimer = dialogDuration;
     }
     
@@ -423,9 +423,32 @@ function drawDialog(x, y, dialogText) {
   fill(255);
   rect(padding, boxY, boxWidth, boxHeight, 12.5);
   
+  // Calculate text wrapping and positioning
+  let words = dialogText.split(' ');
+  let line = '';
+  let lines = [];
+  let maxWidth = boxWidth - padding * 2;
+  
+  for (let word of words) {
+    let testLine = line + word + ' ';
+    if (textWidth(testLine) > maxWidth) {
+      lines.push(line);
+      line = word + ' ';
+    } else {
+      line = testLine;
+    }
+  }
+  lines.push(line);
+  
   // Draw text centered in box
   fill(0);
-  text(dialogText, width/2, height/2);
+  let lineHeight = 80;
+  let totalTextHeight = lines.length * lineHeight;
+  let startY = boxY + (boxHeight - totalTextHeight)/2 + lineHeight;
+  
+  lines.forEach((line, i) => {
+    text(line.trim(), width/2, startY + (i * lineHeight));
+  });
   
   pop();
 }
