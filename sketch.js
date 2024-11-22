@@ -7,6 +7,9 @@ let turnInterval; // Random interval for head turning
 let turnDirection = 0; // Direction of the head (left/right/neutral)
 let blinkTimer = 0; // Timer for blinking
 let blinkInterval; // Random interval for blinking
+let chickenX = 300; // Chicken's X position
+let chickenY = 300; // Chicken's Y position
+let moveSpeed = 5;  // Movement speed
 
 function setup() {
   createCanvas(600, 600);
@@ -21,29 +24,42 @@ function setup() {
 
 function draw() {
   background('#3CB371'); // Green background
+  
+  // Handle WASD movement
+  if (keyIsDown(87)) { // W key
+    chickenY -= moveSpeed;
+  }
+  if (keyIsDown(83)) { // S key
+    chickenY += moveSpeed;
+  }
+  if (keyIsDown(65)) { // A key
+    chickenX -= moveSpeed;
+  }
+  if (keyIsDown(68)) { // D key
+    chickenX += moveSpeed;
+  }
 
-  // Draw the chicken
-  drawChicken(300, 300);
+  // Draw the chicken at its current position
+  drawChicken(chickenX, chickenY);
 
   // Blinking logic
   blinkTimer++;
   if (blinkTimer >= blinkInterval) {
-    eyeOpen = !eyeOpen; // Toggle eye state
-    blinkTimer = 0; // Reset timer
-    blinkInterval = random(60, 180); // New random interval
+    eyeOpen = !eyeOpen;
+    blinkTimer = 0;
+    blinkInterval = random(60, 180);
   }
 
   // Head turning logic
   turnTimer++;
   if (turnTimer >= turnInterval) {
-    // Choose a new random head turn direction (-1 = left, 1 = right, 0 = center)
-    turnDirection = floor(random(-1, 2)); 
-    turnTimer = 0; // Reset timer
-    turnInterval = random(120, 240); // New random interval
+    turnDirection = floor(random(-1, 2));
+    turnTimer = 0;
+    turnInterval = random(120, 240);
   }
 
   // Update head rotation angle
-  headTurnAngle = turnDirection * 10; // Rotate ±10 degrees
+  headTurnAngle = turnDirection * 10;
 }
 
 function drawChicken(x, y) {
@@ -54,27 +70,27 @@ function drawChicken(x, y) {
   rect(x - 15, y - 15, 10, 10); // Left wing
   rect(x + 5, y - 15, 10, 10); // Right wing
 
-  // Head
-  push(); // Save the current transformation state
-  translate(x, y - 10); // Move to the neck position
-  rotate(radians(headTurnAngle)); // Rotate the head around the neck
-  rect(-5, -15, 10, 10); // Draw the head
+  // Head (now properly attached to body)
+  push();
+  translate(x, y - 20); // Move to top of body
+  rotate(radians(headTurnAngle));
+  rect(-5, -10, 10, 10); // Head
 
   // Eye
-  fill(0); // Black for eye
+  fill(0);
   if (eyeOpen) {
-    rect(-3, -12, 2, 2); // Open eye
+    rect(-3, -7, 2, 2);
   } else {
-    rect(-3, -10, 2, 1); // Closed eye
+    rect(-3, -5, 2, 1);
   }
 
   // Beak
   fill(beakColor);
-  rect(0, -12, 5, 3); // Beak
-  pop(); // Restore the transformation state
+  rect(0, -7, 5, 3);
+  pop();
 
   // Legs
-  fill(0); // Black legs
+  fill(0);
   rect(x - 7, y, 3, 5);
   rect(x + 4, y, 3, 5);
 }
