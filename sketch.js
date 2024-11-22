@@ -35,7 +35,7 @@ let grassHeight = 25; // Half of duck height (50)
 let grassColors = ['#2E8B57'];
 
 function preload() {
-  historyFont = loadFont('m3x6.ttf');
+  historyFont = loadFont('History-Seven.otf');
 }
 
 function setup() {
