@@ -53,9 +53,9 @@ function setup() {
   appleX = random(100, width - 100);
   appleY = random(100, height - 100);
 
-  // Initialize grass blades across the entire canvas
-  for (let y = 0; y < height; y += 31.25) { // Space rows by max grass height
-    for (let x = 0; x < width + 6.25; x += 6.25) {
+  // Initialize grass blades with more spacing
+  for (let y = 0; y < height; y += 50) { // More vertical spacing
+    for (let x = 0; x < width + 6.25; x += 12.5) { // More horizontal spacing
       grassBlades.push(new GrassBlade(x, y));
     }
   }
@@ -132,16 +132,26 @@ function draw() {
   // Update wind
   windAngle += windSpeed;
 
-  // Draw all grass
+  // Draw background grass
   grassBlades.forEach(blade => {
-    blade.draw();
+    if (!blade.isInFrontOfDuck(duckX, duckY)) {
+      blade.draw();
+    }
   });
 
-  // Draw scene elements (apples, duck, etc)
+  // Draw scene elements (apples, duck, shadows)
+  apples.forEach(apple => {
+    drawAppleShadow(apple.x, apple.y);
+  });
+  apples.forEach(apple => {
+    drawApple(apple.x, apple.y);
+  });
+  drawShadow(duckX, duckY, duckSize);
+  drawDuck(duckX, duckY + jumpHeight);
 
-  // Draw some foreground grass
+  // Draw foreground grass
   grassBlades.forEach(blade => {
-    if (blade.baseY > duckY && blade.height === 18.75 && random() < 0.2) {
+    if (blade.isInFrontOfDuck(duckX, duckY)) {
       blade.draw();
     }
   });
@@ -271,15 +281,23 @@ class GrassBlade {
   constructor(x, y) {
     this.x = x;
     this.baseY = y;
-    this.height = random([18.75, 25, 31.25]); // Three possible heights in 6.25 increments
-    this.swayOffset = random([0, PI/2, PI, PI*1.5]); // Four possible phases
+    this.height = random([18.75, 25]); // Only two heights for less density
+    this.swayOffset = random([0, PI/2, PI, PI*1.5]);
     this.width = 6.25;
     this.color = random(grassColors);
   }
   
-  draw() {
-    let sway = round(sin(windAngle + this.swayOffset) * 6.25 / 6.25) * 6.25; // Quantize to 6.25
+  draw(isDuck) {
+    let sway = round(sin(windAngle + this.swayOffset) * 6.25 / 6.25) * 6.25;
     fill(this.color);
     rect(this.x + sway, this.baseY, this.width, this.height);
+  }
+
+  isInFrontOfDuck(duckX, duckY) {
+    return (
+      this.x > duckX - 37.5 && 
+      this.x < duckX + 37.5 && 
+      this.baseY > duckY - 25
+    );
   }
 }
