@@ -30,7 +30,7 @@ let apples = [{x: 400, y: 400}]; // Start with one apple
 let maxApples = 1;               // Will increase as score goes up
 let grassBlades = [];
 let windAngle = PI/4;
-let windSpeed = 0.01;
+let windSpeed = 0.005;
 let grassHeight = 25; // Half of duck height (50)
 let grassColors = ['#2E8B57'];
 
@@ -103,7 +103,7 @@ function draw() {
   checkCollision();
 
   // Draw ALL grass first
-  windAngle += sin(frameCount * 0.001) * 0.001;
+  windAngle += windSpeed;
   grassBlades.forEach(blade => {
     if (!blade.isInFrontOfDuck(duckX, duckY)) {
       blade.draw();
@@ -277,35 +277,32 @@ class GrassBlade {
     this.height = random([12.5, 18.75, 25, 31.25]);
     this.width = 6.25;
     this.color = '#2E8B57';
-    this.phase = x / width * TWO_PI;
   }
   
   draw() {
     fill(this.color);
-    // Calculate wind direction components
-    let windX = cos(windAngle) * 6.25;
-    let windY = sin(windAngle) * 6.25;
-    
     // Draw main grass blade
     rect(this.x, this.baseY, this.width, this.height - 6.25);
     
-    // Draw swaying top section with both x and y offset
-    rect(this.x + round(windX), this.baseY + round(windY), this.width, 6.25);
+    // Draw swaying top section
+    let windX = cos(windAngle) * 6.25;
+    let windY = sin(windAngle) * 6.25;
+    rect(this.x + windX, this.baseY + windY, this.width, 6.25);
   }
 
   isInFrontOfDuck(duckX, duckY) {
     return (
-      Math.abs(this.x - duckX) < 18.75 && // Decreased from 31.25 to 18.75 (3 * 6.25)
-      this.baseY > duckY - 6.25 && // Decreased from 18.75 to 6.25
-      this.baseY < duckY + 18.75 // Decreased from 31.25 to 18.75 (3 * 6.25)
+      Math.abs(this.x - duckX) < 18.75 &&
+      this.baseY > duckY - 6.25 &&
+      this.baseY < duckY + 18.75
     );
   }
 
   isInFrontOfApple(appleX, appleY) {
     return (
-      Math.abs(this.x - appleX) < 18.75 && // Decreased from 31.25 to 18.75 (3 * 6.25)
-      this.baseY > appleY - 6.25 && // Decreased from 18.75 to 6.25
-      this.baseY < appleY + 18.75 // Decreased from 31.25 to 18.75 (3 * 6.25)
+      Math.abs(this.x - appleX) < 18.75 &&
+      this.baseY > appleY - 6.25 &&
+      this.baseY < appleY + 18.75
     );
   }
 }
