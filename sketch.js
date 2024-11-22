@@ -1,5 +1,3 @@
-import DIALOG from './dialog.js';
-
 let duckColor = '#FFFFFF';
 let duckX = 400;
 let duckY = 400;
@@ -30,16 +28,19 @@ let friction = 0.9;
 let maxSpeed = 12;
 let apples = [{x: 400, y: 400}]; // Start with one apple
 let maxApples = 1;               // Will increase as score goes up
-let pigeon;
+let grassBlades = [];
+let windAngle = 0;
+let windSpeed = 0.01;
+let grassHeight = 25; // Half of duck height (50)
+let grassColors = ['#2E8B57'];
+let pigeonX = -50;
+let pigeonY = -50;
+let pigeonActive = false;
+let pigeonSpeed = 3;
+let pigeonDirection = 0; // -1 left, 0 center, 1 right
 
 function preload() {
-  try {
-    historyFont = loadFont('m3x6.ttf');
-  } catch (e) {
-    console.error('Failed to load font:', e);
-    // Use a system font as fallback
-    historyFont = 'monospace';
-  }
+  historyFont = loadFont('m3x6.ttf');
 }
 
 function setup() {
@@ -47,16 +48,24 @@ function setup() {
   noSmooth();
   noStroke();
   frameRate(30);
-  
-  pigeon = new Pigeon();
-  
+
   // Initialize blink and turn intervals
   blinkInterval = random(60, 180);
   turnInterval = random(120, 240);
   
   // Set random position for apple
+  // Keep apple away from edges by staying 100px within border
   appleX = random(100, width - 100);
   appleY = random(100, height - 100);
+
+  // Initialize grass blades with random spacing
+  for (let y = 0; y < height; y += 25) { // Closer vertical spacing
+    for (let x = 0; x < width + 6.25; x += 18.75) { // Variable horizontal spacing
+      if (random() < 0.7) { // 70% chance to place grass
+        grassBlades.push(new GrassBlade(x, y));
+      }
+    }
+  }
 }
 
 function draw() {
@@ -98,33 +107,54 @@ function draw() {
   // Check for apple collection
   checkCollision();
 
+  // Draw ALL grass first
+  windAngle += windSpeed;
+  grassBlades.forEach(blade => {
+    if (!blade.isInFrontOfDuck(duckX, duckY)) {
+      blade.draw();
+    }
+  });
+
   // Draw game elements
   apples.forEach(apple => {
     drawAppleShadow(apple.x, apple.y);
+    
+    // Draw background grass for this apple
+    grassBlades.forEach(blade => {
+      if (!blade.isInFrontOfApple(apple.x, apple.y) && !blade.isInFrontOfDuck(duckX, duckY)) {
+        blade.draw();
+      }
+    });
+    
     drawApple(apple.x, apple.y);
+    
+    // Draw foreground grass for this apple
+    grassBlades.forEach(blade => {
+      if (blade.isInFrontOfApple(apple.x, apple.y)) {
+        blade.draw();
+      }
+    });
   });
   
   drawShadow(duckX, duckY, duckSize);
   drawDuck(duckX, duckY + jumpHeight);
+  
+  // Draw foreground grass for duck
+  grassBlades.forEach(blade => {
+    if (blade.isInFrontOfDuck(duckX, duckY)) {
+      blade.draw();
+    }
+  });
 
   // Handle pigeon
-  pigeon.update(window, duckX, duckY, score);
-  pigeon.draw(window, drawShadow);
-
-  if (pigeon.showDialog) {
-    textFont(historyFont);
-    textSize(50);
-    textAlign(CENTER, BOTTOM);
-    fill(0);
-    text(DIALOG.pigeon.greeting, width/2, height - 50);
-  }
-
+  handlePigeon();
+  
   // Draw score last (on top of everything)
   textFont(historyFont);
   textSize(200);
   textAlign(LEFT, TOP);
   fill(0);
-  text(score, 50, 50);
+  text(score, 20, -30);
 }
 
 function drawDuck(x, y) {
@@ -243,84 +273,132 @@ function drawShadow(x, y, size) {
 }
 
 function drawAppleShadow(x, y) {
-  fill(0, 0, 0, 50);
-  ellipse(x, y + 5, 50, 12.5);
+  fill(0, 0, 0, 50); // Semi-transparent black
+  rect(x - 25, y + 12.5, 50, 12.5); // Base shadow
+  rect(x - 12.5, y + 6.25, 25, 6.25); // Top shadow
 }
 
-class Pigeon {
-  constructor() {
-    this.x = -50;
-    this.y = -50;
-    this.active = false;
-    this.speed = 3;
-    this.direction = 0;
-    this.hasGreeted = false;
-    this.showDialog = false;
+class GrassBlade {
+  constructor(x, y) {
+    this.x = x + random(-6.25, 6.25);
+    this.baseY = y + random(-12.5, 12.5);
+    this.height = random([12.5, 18.75, 25, 31.25]);
+    this.width = 6.25;
+    this.color = '#2E8B57';
+  }
+  
+  draw() {
+    fill(this.color);
+    // Draw main grass blade
+    rect(this.x, this.baseY, this.width, this.height - 6.25);
+    
+    // Simple 8-bit style movement
+    let offset = round(cos(windAngle)) * 6.25;
+    rect(this.x + offset, this.baseY, this.width, 6.25);
   }
 
-  draw(window, drawShadow) {
-    if (!this.active) return;
-    
-    drawShadow(this.x, this.y, 1);
-    fill('#808080');
-    
-    // Body
-    rect(this.x - 25, this.y - 50, 50, 50);
-    rect(this.x - 37.5, this.y - 43.75, 31.25, 31.25);
-    rect(this.x + 6.25, this.y - 43.75, 31.25, 31.25);
-    rect(this.x - 18.75, this.y - 75, 37.5, 18.75);
-    
-    if (this.direction <= 0) {
-      fill('#000000');
-      rect(this.x - 12.5, this.y - 68.75, 6.25, 6.25);
-      fill('#FF0000');
-      rect(this.x, this.y - 68.75, 6.25, 6.25);
-    } else {
-      fill('#000000');
-      rect(this.x + 6.25, this.y - 68.75, 6.25, 6.25);
-      fill('#FF0000');
-      rect(this.x - 6.25, this.y - 68.75, 6.25, 6.25);
-    }
-    
-    fill('#4B0082');
-    rect(this.x - 6.25, this.y - 62.5, 12.5, 6.25);
-    
-    fill('#FF6B6B');
-    rect(this.x - 12.5, this.y, 6.25, 12.5);
-    rect(this.x + 6.25, this.y, 6.25, 12.5);
+  isInFrontOfDuck(duckX, duckY) {
+    return (
+      Math.abs(this.x - duckX) < 18.75 &&
+      this.baseY > duckY - 6.25 &&
+      this.baseY < duckY + 18.75
+    );
   }
 
-  update(window, duckX, duckY, score) {
-    if (!this.active && score >= 10) {
-      this.activate();
-    }
-
-    if (this.active) {
-      let dx = duckX - this.x;
-      let dy = duckY - this.y;
-      let dist = sqrt(dx * dx + dy * dy);
-      
-      if (dist > 75) {
-        this.x += (dx / dist) * this.speed;
-        this.y += (dy / dist) * this.speed;
-        this.direction = dx > 0 ? 1 : -1;
-        this.showDialog = false;
-      } else if (!this.hasGreeted) {
-        this.showDialog = true;
-        this.hasGreeted = true;
-      }
-    }
+  isInFrontOfApple(appleX, appleY) {
+    return (
+      Math.abs(this.x - appleX) < 18.75 &&
+      this.baseY > appleY - 6.25 &&
+      this.baseY < appleY + 18.75
+    );
   }
+}
 
-  activate() {
-    this.active = true;
+function drawPigeon(x, y) {
+  fill('#808080'); // Gray base color
+  
+  // Body (same size as duck)
+  rect(x - (25 * duckSize), y - (50 * duckSize), 50 * duckSize, 50 * duckSize);
+  
+  // Wings (slightly different shape than duck)
+  rect(x - (37.5 * duckSize), y - (43.75 * duckSize), 31.25 * duckSize, 31.25 * duckSize); // Left wing
+  rect(x + (6.25 * duckSize), y - (43.75 * duckSize), 31.25 * duckSize, 31.25 * duckSize); // Right wing
+  
+  // Neck (shorter than duck)
+  rect(x - (12.5 * duckSize), y - (62.5 * duckSize), 25 * duckSize, 12.5 * duckSize);
+  
+  // Head (rounder than duck)
+  rect(x - (18.75 * duckSize), y - (75 * duckSize), 37.5 * duckSize, 18.75 * duckSize);
+  
+  // Eye and Beak
+  if (turnDirection <= 0) {  // Looking left or center
+    // Beak (smaller than duck)
+    fill('#000000'); // Black beak
+    rect(x - (12.5 * duckSize), y - (68.75 * duckSize), 6.25 * duckSize, 6.25 * duckSize);
+    // Eye
+    fill('#FF0000'); // Red eye
+    rect(x, y - (68.75 * duckSize), 6.25 * duckSize, 6.25 * duckSize);
+  } else {  // Looking right
+    // Beak
+    fill('#000000');
+    rect(x + (6.25 * duckSize), y - (68.75 * duckSize), 6.25 * duckSize, 6.25 * duckSize);
+    // Eye
+    fill('#FF0000');
+    rect(x - (6.25 * duckSize), y - (68.75 * duckSize), 6.25 * duckSize, 6.25 * duckSize);
+  }
+  
+  // Neck pattern (characteristic pigeon iridescence)
+  fill('#4B0082'); // Indigo
+  rect(x - (6.25 * duckSize), y - (62.5 * duckSize), 12.5 * duckSize, 6.25 * duckSize);
+  
+  // Legs (thinner than duck)
+  fill('#FF6B6B'); // Pink legs
+  rect(x - 12.5, y, 6.25, 12.5);
+  rect(x + 6.25, y, 6.25, 12.5);
+}
+
+function handlePigeon() {
+  if (score === 20 && !pigeonActive) {
+    pigeonActive = true;
+    // Choose random side to enter from
     let side = floor(random(4));
     switch(side) {
-      case 0: this.x = random(width); this.y = -50; break;
-      case 1: this.x = width + 50; this.y = random(height); break;
-      case 2: this.x = random(width); this.y = height + 50; break;
-      case 3: this.x = -50; this.y = random(height); break;
+      case 0: // top
+        pigeonX = random(width);
+        pigeonY = -50;
+        break;
+      case 1: // right
+        pigeonX = width + 50;
+        pigeonY = random(height);
+        break;
+      case 2: // bottom
+        pigeonX = random(width);
+        pigeonY = height + 50;
+        break;
+      case 3: // left
+        pigeonX = -50;
+        pigeonY = random(height);
+        break;
     }
   }
+  
+  if (pigeonActive) {
+    // Calculate direction to duck
+    let dx = duckX - pigeonX;
+    let dy = duckY - pigeonY;
+    let dist = sqrt(dx * dx + dy * dy);
+    
+    // Only move if not close to duck
+    if (dist > 75) {
+      pigeonX += (dx / dist) * pigeonSpeed;
+      pigeonY += (dy / dist) * pigeonSpeed;
+      
+      // Update pigeon direction based on movement
+      pigeonDirection = dx > 0 ? 1 : -1;
+    }
+    
+    // Draw pigeon shadow and pigeon
+    drawShadow(pigeonX, pigeonY, 1);
+    drawPigeon(pigeonX, pigeonY);
+  }
 }
-
