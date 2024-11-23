@@ -44,6 +44,12 @@ let dialogState = {
   sequence: ['greeting', 'choices', 'response']
 };
 let currentDialogIndex = 0;
+let pigeonFollowing = false;
+let pigeonHasSpoken = false;
+let seeds = []; // Array to store seeds with their growth state
+const SEED_CHANCE = 0.1; // 10% chance
+const SPROUT_TIME = 450; // 15 seconds at 30fps
+const GROWTH_TIME = 900; // 30 seconds at 30fps
 
 const DIALOG = {
   pigeon: {
@@ -133,12 +139,44 @@ function draw() {
     drawApple(apple.x, apple.y);
   });
   
-  drawShadow(duckX, duckY, duckSize);
-  drawDuck(duckX, duckY + jumpHeight);
-
-  // Handle pigeon
-  handlePigeon();
+  // Draw seeds
+  seeds.forEach(seed => {
+    seed.age++;
+    if (seed.age >= GROWTH_TIME && seed.stage < 2) {
+      seed.stage = 2;
+    } else if (seed.age >= SPROUT_TIME && seed.stage < 1) {
+      seed.stage = 1;
+    }
+    drawSeed(seed);
+  });
   
+  // Draw characters in order based on Y position
+  if (pigeonActive) {
+    let duckDrawY = duckY + jumpHeight;
+    let duckFeetY = duckDrawY;
+    let pigeonFeetY = pigeonY;
+    
+    if (duckFeetY < pigeonFeetY) {
+      // Duck is behind pigeon
+      drawShadow(duckX, duckY, duckSize);
+      drawDuck(duckX, duckDrawY);
+      drawPigeonShadow(pigeonX, pigeonY);
+      drawPigeon(pigeonX, pigeonY);
+    } else {
+      // Pigeon is behind duck
+      drawPigeonShadow(pigeonX, pigeonY);
+      drawPigeon(pigeonX, pigeonY);
+      drawShadow(duckX, duckY, duckSize);
+      drawDuck(duckX, duckDrawY);
+    }
+  } else {
+    drawShadow(duckX, duckY, duckSize);
+    drawDuck(duckX, duckY + jumpHeight);
+  }
+
+  // Update pigeon position
+  handlePigeon();
+
   // Draw score last (on top of everything)
   textFont(historyFont);
   textSize(100);
@@ -153,6 +191,11 @@ function draw() {
     } else if (dialogState.current === 'choices') {
       drawChoices();
     }
+  }
+
+  // Add this at the start of the draw function (around line 95)
+  if (score >= 5) {
+    console.log("Score >= 5, pigeonActive:", pigeonActive);
   }
 }
 
@@ -247,7 +290,8 @@ function keyPressed() {
           currentDialog = null;
           dialogState.current = 'none';
           playerCanMove = true;
-          pigeonActive = false;
+          pigeonFollowing = selectedChoice === 0;
+          pigeonHasSpoken = true;
           break;
       }
     }
@@ -266,6 +310,16 @@ function checkCollision() {
         apples.splice(i, 1);
         
         maxApples = 1 + Math.floor(score / 5);
+        
+        // Check if duck should poop a seed
+        if (random() < SEED_CHANCE) {
+          seeds.push({
+            x: duckX,
+            y: duckY + 12.5,
+            age: 0,
+            stage: 0 // 0: seed, 1: sprout, 2: grown
+          });
+        }
         
         while (apples.length < maxApples) {
           apples.push({
@@ -355,9 +409,9 @@ function drawPigeon(x, y) {
 }
 
 function handlePigeon() {
-  if (score >= 1 && !pigeonActive) {
+  if (score >= 5 && !pigeonActive) {
     pigeonActive = true;
-    // Choose random side to enter from
+    pigeonDirection = 0;
     let side = floor(random(4));
     switch(side) {
       case 0: // top
@@ -367,6 +421,7 @@ function handlePigeon() {
       case 1: // right
         pigeonX = width + 50;
         pigeonY = random(height);
+        pigeonDirection = -1;
         break;
       case 2: // bottom
         pigeonX = random(width);
@@ -375,29 +430,104 @@ function handlePigeon() {
       case 3: // left
         pigeonX = -50;
         pigeonY = random(height);
+        pigeonDirection = 1;
         break;
     }
   }
   
   if (pigeonActive) {
-    let dx = duckX - pigeonX;
-    let dy = duckY - pigeonY;
-    let dist = sqrt(dx * dx + dy * dy);
-    
-    if (dist > 75 && playerCanMove) {
-      pigeonX += (dx / dist) * pigeonSpeed;
-      pigeonY += (dy / dist) * pigeonSpeed;
-      pigeonDirection = dx > 0 ? 1 : -1;
-    } else if (!currentDialog && dialogState.current === 'none') {
-      playerCanMove = false;
-      dialogState.current = 'greeting';
-      currentDialog = [getRandomDialog('pigeon', 'greetings')];
-      dialogTimer = dialogDuration;
-      currentDialogIndex = 0;
+    if (!pigeonHasSpoken) {
+      // Move towards duck for initial conversation
+      let dx = duckX - pigeonX;
+      let dy = duckY - pigeonY;
+      let d = sqrt(dx * dx + dy * dy);
+      
+      if (d > 75) {
+        // Update direction based on movement
+        if (dx !== 0) {
+          pigeonDirection = dx > 0 ? 1 : -1;
+        }
+        // Move towards duck
+        pigeonX += (dx / d) * pigeonSpeed;
+        pigeonY += (dy / d) * pigeonSpeed;
+      } else if (!currentDialog && dialogState.current === 'none') {
+        // Start conversation when close enough
+        playerCanMove = false;
+        dialogState.current = 'greeting';
+        currentDialog = [getRandomDialog('pigeon', 'greetings')];
+        dialogTimer = dialogDuration;
+        currentDialogIndex = 0;
+      }
+    } else if (pigeonFollowing) {
+      // Find and eat apples if friendly response
+      let closestApple = null;
+      let closestDist = Infinity;
+      
+      apples.forEach(apple => {
+        let d = dist(pigeonX, pigeonY, apple.x, apple.y);
+        if (d < closestDist) {
+          closestDist = d;
+          closestApple = apple;
+        }
+      });
+      
+      if (closestApple) {
+        let dx = closestApple.x - pigeonX;
+        let dy = closestApple.y - pigeonY;
+        let d = sqrt(dx * dx + dy * dy);
+        
+        if (dx !== 0) {
+          pigeonDirection = dx > 0 ? 1 : -1;
+        }
+        
+        pigeonX += (dx / d) * pigeonSpeed;
+        pigeonY += (dy / d) * pigeonSpeed;
+        
+        if (d < 75) {
+          let index = apples.indexOf(closestApple);
+          if (index > -1) {
+            apples.splice(index, 1);
+            
+            if (random() < SEED_CHANCE) {
+              seeds.push({
+                x: pigeonX,
+                y: pigeonY + 12.5,
+                age: 0,
+                stage: 0
+              });
+            }
+            
+            while (apples.length < maxApples) {
+              apples.push({
+                x: random(100, width - 100),
+                y: random(100, height - 100)
+              });
+            }
+          }
+        }
+      }
+    } else if (pigeonHasSpoken) {
+      // Fly away if unfriendly response
+      let targetX = pigeonX < width/2 ? -100 : width + 100;
+      let targetY = -100;
+      let dx = targetX - pigeonX;
+      let dy = targetY - pigeonY;
+      let d = sqrt(dx * dx + dy * dy);
+      
+      pigeonX += (dx / d) * pigeonSpeed;
+      pigeonY += (dy / d) * pigeonSpeed;
+      
+      // Remove pigeon when off screen
+      if (pigeonY < -100 || pigeonX < -100 || pigeonX > width + 100) {
+        pigeonActive = false;
+      }
     }
     
-    drawShadow(pigeonX, pigeonY, 1);
-    drawPigeon(pigeonX, pigeonY);
+    // Keep pigeon within bounds while active
+    if (pigeonFollowing) {
+      pigeonX = constrain(pigeonX, 50, width - 50);
+      pigeonY = constrain(pigeonY, 50, height - 50);
+    }
   }
 }
 
@@ -461,4 +591,41 @@ function drawChoices() {
   });
 
   pop();
+}
+
+function drawPigeonShadow(x, y) {
+  fill(0, 0, 0, 50); // Semi-transparent black
+  rect(x - (25 * duckSize), y + 5, 50 * duckSize, 12.5);
+}
+
+function drawSeed(seed) {
+  switch(seed.stage) {
+    case 0: // Basic seed
+      fill('#4B2F1C'); // Brown color
+      rect(seed.x - 6.25, seed.y - 6.25, 12.5, 12.5);
+      break;
+      
+    case 1: // First sprout
+      // Seed
+      fill('#4B2F1C');
+      rect(seed.x - 6.25, seed.y - 6.25, 12.5, 12.5);
+      // Stem
+      fill('#228B22'); // Forest Green (same as leaf color)
+      rect(seed.x - 3.125, seed.y - 18.75, 6.25, 12.5);
+      // Leaf
+      rect(seed.x, seed.y - 18.75, 12.5, 6.25);
+      break;
+      
+    case 2: // Grown sprout
+      // Seed
+      fill('#4B2F1C');
+      rect(seed.x - 6.25, seed.y - 6.25, 12.5, 12.5);
+      // Stem
+      fill('#228B22');
+      rect(seed.x - 3.125, seed.y - 25, 6.25, 18.75);
+      // Leaves
+      rect(seed.x, seed.y - 25, 12.5, 6.25);
+      rect(seed.x - 12.5, seed.y - 18.75, 12.5, 6.25);
+      break;
+  }
 }
