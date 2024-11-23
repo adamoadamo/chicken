@@ -1,3 +1,7 @@
+const SEED_CHANCE = 0.25;
+const SPROUT_TIME = 450;
+const GROWTH_TIME = 900;
+
 let duckColor = '#FFFFFF';
 let duckX = 400;
 let duckY = 400;
@@ -44,12 +48,8 @@ let dialogState = {
   sequence: ['greeting', 'choices', 'response']
 };
 let currentDialogIndex = 0;
-let pigeonFollowing = false;
 let pigeonHasSpoken = false;
 let seeds = []; // Array to store seeds with their growth state
-const SEED_CHANCE = 0.25; // Increased to 25% chance
-const SPROUT_TIME = 450; // 15 seconds at 30fps
-const GROWTH_TIME = 900; // 30 seconds at 30fps
 let titMouseX = 400;
 let titMouseY = 450;
 let titMouseDirection = 0; // -1 left, 0 center, 1 right
@@ -57,43 +57,44 @@ let titMouseSize = 0.6; // 60% the size of duck/pigeon
 let titMouseActive = false;
 let titMouseHasSpoken = false;
 let titMouseFollowing = false;
+let pigeonFollowing = false;
+let pigeonIsMovingToCorner = false;
 let pigeonTargetX = 0;
 let pigeonTargetY = 0;
-let pigeonIsMovingToCorner = false;
 
 const DIALOG = {
   pigeon: {
     greetings: [
-      "There are so many apples. I'm so hungry."
+      "Hey duck you got any apples?"
     ],
     choices: {
       question1: {
-        prompt: "There are so many apples. I'm so hungry.",
+        prompt: "Hey duck you got any apples?",
         options: [
-          "You can have some of mine!",
-          "These are MY apples!"
+          "Ya, I got apples. Have at it.",
+          "Get your own apples."
         ],
         responses: {
-          friendly: "You're so kind! Let's share them.",
-          unfriendly: "How rude! I'll remember this..."
+          friendly: "Hell ya, apple time.",
+          unfriendly: "Damn son, you're a greedy bird."
         }
       }
     }
   },
   titmouse: {
     greetings: [
-      "There are so many sprouts. I'm so hungry."
+      "Sprout city over here, can I eat some of those bad boys?"
     ],
     choices: {
       question1: {
-        prompt: "There are so many sprouts. I'm so hungry.",
+        prompt: "Sprout city over here, can I eat those bad boys?",
         options: [
-          "You can have some of mine!",
-          "These are MY sprouts!"
+          "Have at it, lil buddy.",
+          "Nah, back off pipsqueak."
         ],
         responses: {
-          friendly: "You're so kind! Let's share them.",
-          unfriendly: "How rude! I'll remember this..."
+          friendly: "Heck ya, sprout city.",
+          unfriendly: "What's you're problem?"
         }
       }
     }
@@ -214,7 +215,7 @@ function draw() {
     }
   });
 
-  // Update pigeon position
+  // Handle pigeon behavior
   handlePigeon();
 
   // Draw score last (on top of everything)
@@ -233,7 +234,7 @@ function draw() {
     }
   }
 
-  // Add this at the start of the draw function (around line 95)
+  // Debug: Log pigeon activity when score changes
   if (score >= 5) {
     console.log("Score >= 5, pigeonActive:", pigeonActive);
   }
@@ -241,12 +242,12 @@ function draw() {
   // Update tit mouse position to follow duck
   let dx = duckX - titMouseX;
   let dy = duckY - titMouseY;
-  let dist = sqrt(dx * dx + dy * dy);
-  
-  if (dist > 100) { // Start following if too far
-    titMouseX += (dx / dist) * maxSpeed * 0.8; // Slightly slower than duck
-    titMouseY += (dy / dist) * maxSpeed * 0.8;
-    
+  let distance = dist(duckX, duckY, titMouseX, titMouseY);
+
+  if (distance > 100) { // Start following if too far
+    titMouseX += (dx / distance) * maxSpeed * 0.8; // Slightly slower than duck
+    titMouseY += (dy / distance) * maxSpeed * 0.8;
+
     // Update direction based on movement
     if (dx !== 0) {
       titMouseDirection = dx > 0 ? 1 : -1;
@@ -255,40 +256,39 @@ function draw() {
 
   // Update tit mouse behavior
   let sproutingSeeds = countSproutingSeeds();
-  
+
   if (sproutingSeeds >= 2 && !titMouseActive) {
     titMouseActive = true;
     titMouseX = -50;
     titMouseY = random(height);
+    console.log("Titmouse activated.");
   }
 
   if (titMouseActive && !titMouseHasSpoken) {
     // Move towards duck for conversation
-    let dx = duckX - titMouseX;
-    let dy = duckY - titMouseY;
-    let d = sqrt(dx * dx + dy * dy);
-    
-    if (d > 75) {
-      if (dx !== 0) {
-        titMouseDirection = dx > 0 ? 1 : -1;
+    let dxTit = duckX - titMouseX;
+    let dyTit = duckY - titMouseY;
+    let distanceTit = dist(duckX, duckY, titMouseX, titMouseY);
+
+    if (distanceTit > 75) {
+      if (dxTit !== 0) {
+        titMouseDirection = dxTit > 0 ? 1 : -1;
       }
-      titMouseX += (dx / d) * maxSpeed * 0.6;  // Slower movement
-      titMouseY += (dy / d) * maxSpeed * 0.6;
+      titMouseX += (dxTit / distanceTit) * maxSpeed * 0.6;  // Slower movement
+      titMouseY += (dyTit / distanceTit) * maxSpeed * 0.6;
+      console.log("Titmouse is moving towards the duck for conversation.");
     }
   }
 
   if (pigeonActive && !pigeonHasSpoken) {
-    // Move towards duck for conversation
-    let dx = duckX - pigeonX;
-    let dy = duckY - pigeonY;
-    let d = sqrt(dx * dx + dy * dy);
-    
-    if (d > 75) {
-      if (dx !== 0) {
-        pigeonDirection = dx > 0 ? 1 : -1;
-      }
-      pigeonX += (dx / d) * pigeonSpeed;
-      pigeonY += (dy / d) * pigeonSpeed;
+    // Pigeon is approaching for initial conversation
+    let dxPig = duckX - pigeonX;
+    let dyPig = duckY - pigeonY;
+    let distancePig = dist(duckX, duckY, pigeonX, pigeonY);
+
+    if (distancePig < 100) {
+      // Initiate dialog handled in keyPressed()
+      console.log("Pigeon is near the duck and ready to dialog.");
     }
   }
 }
@@ -354,8 +354,7 @@ function drawApple(x, y) {
 }
 
 function keyPressed() {
-  // Start conversation when X is pressed near a character
-  if (keyCode === 88) {
+  if (keyCode === 88) { // X key
     if (!currentDialog && dialogState.current === 'none') {
       // Check distance to titmouse
       if (titMouseActive && !titMouseHasSpoken) {
@@ -365,9 +364,9 @@ function keyPressed() {
           dialogState.current = 'greeting';
           currentDialog = [DIALOG.titmouse.greetings[0]];
           dialogTimer = dialogDuration;
-          currentDialogIndex = 0;
           dialogChoices = DIALOG.titmouse.choices.question1.options;
           selectedChoice = 0;
+          console.log("Started dialog with Titmouse.");
           return false;
         }
       }
@@ -380,14 +379,45 @@ function keyPressed() {
           dialogState.current = 'greeting';
           currentDialog = [DIALOG.pigeon.greetings[0]];
           dialogTimer = dialogDuration;
-          currentDialogIndex = 0;
           dialogChoices = DIALOG.pigeon.choices.question1.options;
           selectedChoice = 0;
+          console.log("Started dialog with Pigeon.");
           return false;
         }
       }
+    } else if (dialogState.current === 'greeting') {
+      // Transition from greeting to choices
+      dialogState.current = 'choices';
+      dialogTimer = dialogDuration;
+      return false;
+    } else if (dialogState.current === 'choices') {
+      // Handle choice selection and show response
+      let response = selectedChoice === 0 ? 'friendly' : 'unfriendly';
+      
+      if (currentDialog[0] === DIALOG.titmouse.greetings[0]) {
+        titMouseHasSpoken = true;
+        currentDialog = [DIALOG.titmouse.choices.question1.responses[response]];
+      } else if (currentDialog[0] === DIALOG.pigeon.greetings[0]) {
+        pigeonHasSpoken = true;
+        currentDialog = [DIALOG.pigeon.choices.question1.responses[response]];
+        
+        if (response === 'friendly') {
+          pigeonFollowing = true;
+          pigeonIsMovingToCorner = false;
+        } else {
+          pigeonFollowing = false;
+          pigeonIsMovingToCorner = true;
+          pigeonTargetX = 50;
+          pigeonTargetY = height - 50;
+        }
+      }
+      
+      dialogState.current = 'response';
+      dialogTimer = dialogDuration;
+      dialogChoices = [];
+      return false;
     } else if (dialogState.current === 'response') {
-      // End the dialog and allow player movement again
+      // End dialog
       currentDialog = null;
       dialogState.current = 'none';
       playerCanMove = true;
@@ -395,60 +425,16 @@ function keyPressed() {
     }
   }
   
-  // Handle dialog progression
-  if (currentDialog && dialogState.current === 'greeting' && keyCode === 88) {
-    dialogState.current = 'choices';
-    currentDialog = null;
-    return false;
-  }
-  
+  // Handle choice selection with arrow keys
   if (dialogState.current === 'choices') {
     if (keyCode === UP_ARROW) {
-      selectedChoice = (selectedChoice - 1 + dialogChoices.length) % dialogChoices.length;
-      return false;
-    } else if (keyCode === DOWN_ARROW) {
-      selectedChoice = (selectedChoice + 1) % dialogChoices.length;
-      return false;
-    } else if (keyCode === 88) { // X key
-      let response = selectedChoice === 0 ? 'friendly' : 'unfriendly';
-      dialogState.current = 'response';
-      
-      // Check which character is speaking
-      if (currentDialog && currentDialog[0] === DIALOG.titmouse.greetings[0]) {
-        currentDialog = [DIALOG.titmouse.choices.question1.responses[response]];
-        titMouseHasSpoken = true;
-      } else {
-        currentDialog = [DIALOG.pigeon.choices.question1.responses[response]];
-        pigeonHasSpoken = true;
-      }
-      
-      dialogChoices = [];
-      dialogTimer = dialogDuration;
-      currentDialogIndex = 0;
+      selectedChoice = max(0, selectedChoice - 1);
       return false;
     }
-  }
-  
-  if (keyCode === 88 && dialogState.current === 'response') { // X key pressed during response
-    if (currentDialog && currentDialog[0] === DIALOG.pigeon.choices.question1.responses[response]) {
-      // For pigeon dialog
-      if (selectedChoice === 0) { // Friendly response
-        pigeonFollowing = true;
-        pigeonIsMovingToCorner = false;
-      } else { // Unfriendly response
-        pigeonFollowing = false;
-        pigeonIsMovingToCorner = true;
-        // Set corner position
-        pigeonTargetX = 50;
-        pigeonTargetY = height - 50;
-      }
+    if (keyCode === DOWN_ARROW) {
+      selectedChoice = min(dialogChoices.length - 1, selectedChoice + 1);
+      return false;
     }
-    
-    // Reset dialog state
-    currentDialog = null;
-    dialogState.current = 'none';
-    playerCanMove = true;
-    return false;
   }
 }
 
@@ -578,94 +564,148 @@ function drawPigeon(x, y) {
 }
 
 function handlePigeon() {
+  // Initial spawn check
   if (score >= 5 && !pigeonActive) {
     pigeonActive = true;
-    pigeonDirection = 0;
-    let side = floor(random(4));
-    switch(side) {
-      case 0: // top
-        pigeonX = random(width);
-        pigeonY = -50;
-        break;
-      case 1: // right
-        pigeonX = width + 50;
-        pigeonY = random(height);
-        pigeonDirection = -1;
-        break;
-      case 2: // bottom
-        pigeonX = random(width);
-        pigeonY = height + 50;
-        break;
-      case 3: // left
-        pigeonX = -50;
-        pigeonY = random(height);
-        pigeonDirection = 1;
-        break;
-    }
-  }
-  
-  if (pigeonActive && pigeonFollowing) {
-    // Find nearest apple
-    let nearestApple = null;
-    let nearestDist = Infinity;
-    
-    for (let apple of apples) {
-      let dx = apple.x - pigeonX;
-      let dy = apple.y - pigeonY;
-      let d = sqrt(dx * dx + dy * dy);
-      if (d < nearestDist) {
-        nearestDist = d;
-        nearestApple = apple;
-      }
-    }
-    
-    if (nearestApple) {
-      let dx = nearestApple.x - pigeonX;
-      let dy = nearestApple.y - pigeonY;
-      let d = sqrt(dx * dx + dy * dy);
-      
-      if (d > 0) {
-        pigeonX += (dx / d) * pigeonSpeed;
-        pigeonY += (dy / d) * pigeonSpeed;
-        
-        if (dx !== 0) {
-          pigeonDirection = dx > 0 ? 1 : -1;
-        }
-        
-        // Eat apple if close enough
-        if (d < 50) {
-          apples = apples.filter(a => a !== nearestApple);
-          score++;
-          
-          // Check if pigeon should drop a seed
-          if (random() < SEED_CHANCE) {
-            seeds.push({
-              x: pigeonX,
-              y: pigeonY + 12.5,
-              age: 0,
-              stage: 0
-            });
-          }
-        }
-      }
-    }
+    spawnPigeon();
+    console.log("Pigeon spawned.");
   }
 
-  if (pigeonIsMovingToCorner) {
-    let dx = pigeonTargetX - pigeonX;
-    let dy = pigeonTargetY - pigeonY;
-    let d = sqrt(dx * dx + dy * dy);
-    
-    if (d > 5) {  // Keep moving until very close to target
-      pigeonX += (dx / d) * pigeonSpeed;
-      pigeonY += (dy / d) * pigeonSpeed;
+  if (pigeonActive) {
+    if (!pigeonHasSpoken) {
+      // Move towards duck for initial conversation
+      let dx = duckX - pigeonX;
+      let dy = duckY - pigeonY;
+      let d = sqrt(dx * dx + dy * dy);
       
-      if (dx !== 0) {
+      if (d > 75) {
+        pigeonX += (dx / d) * pigeonSpeed;
+        pigeonY += (dy / d) * pigeonSpeed;
         pigeonDirection = dx > 0 ? 1 : -1;
+        console.log("Pigeon is approaching the duck.");
       }
     } else {
-      pigeonIsMovingToCorner = false;  // Stop moving once reached target
+      if (pigeonFollowing) {
+        // Follow and eat apples
+        let nearestApple = findNearestApple();
+        if (nearestApple) {
+          let dx = nearestApple.x - pigeonX;
+          let dy = nearestApple.y - pigeonY;
+          let d = sqrt(dx * dx + dy * dy);
+          
+          if (d > 50) {
+            pigeonX += (dx / d) * pigeonSpeed;
+            pigeonY += (dy / d) * pigeonSpeed;
+            pigeonDirection = dx > 0 ? 1 : -1;
+            console.log("Pigeon is moving towards an apple.");
+          } else {
+            // Eat the apple
+            apples = apples.filter(a => a !== nearestApple);
+            score++;
+            console.log("Pigeon ate an apple. Score:", score);
+            
+            // Chance to drop a seed
+            if (random() < SEED_CHANCE) {
+              seeds.push({
+                x: pigeonX,
+                y: pigeonY + 12.5,
+                age: 0,
+                stage: 0
+              });
+              console.log("Pigeon dropped a seed.");
+            }
+          }
+        }
+      } else if (pigeonIsMovingToCorner) {
+        // Move to the designated corner
+        let dx = pigeonTargetX - pigeonX;
+        let dy = pigeonTargetY - pigeonY;
+        let d = sqrt(dx * dx + dy * dy);
+        
+        if (d > 5) {
+          pigeonX += (dx / d) * pigeonSpeed;
+          pigeonY += (dy / d) * pigeonSpeed;
+          pigeonDirection = dx > 0 ? 1 : -1;
+          console.log("Pigeon is moving to the corner.");
+        } else {
+          pigeonIsMovingToCorner = false;
+          console.log("Pigeon reached the corner.");
+        }
+      }
     }
+  }
+}
+
+function moveTowardsDuck(x, y, speed) {
+  let dx = duckX - x;
+  let dy = duckY - y;
+  let d = sqrt(dx * dx + dy * dy);
+  
+  if (d > 75) {
+    pigeonX += (dx / d) * speed;
+    pigeonY += (dy / d) * speed;
+    pigeonDirection = dx > 0 ? 1 : -1;
+  }
+}
+
+function findNearestApple() {
+  let nearestApple = null;
+  let nearestDist = Infinity;
+  
+  for (let apple of apples) {
+    let d = dist(pigeonX, pigeonY, apple.x, apple.y);
+    if (d < nearestDist) {
+      nearestDist = d;
+      nearestApple = apple;
+    }
+  }
+  return nearestApple;
+}
+function moveTowardsAndEatApple(apple) {
+  let dx = apple.x - pigeonX;
+  let dy = apple.y - pigeonY;
+  let d = sqrt(dx * dx + dy * dy);
+  
+  if (d > 75) {
+    pigeonX += (dx / d) * pigeonSpeed;
+    pigeonY += (dy / d) * pigeonSpeed;
+    pigeonDirection = dx > 0 ? 1 : -1;
+  } else if (d <= 75 && d > 50) {
+    // Continue approaching
+    pigeonX += (dx / d) * pigeonSpeed;
+    pigeonY += (dy / d) * pigeonSpeed;
+  } else if (d <= 50) {
+    // Eat the apple
+    apples = apples.filter(a => a !== apple);
+    score++;
+    console.log("Pigeon ate an apple. Score:", score);
+    
+    // Chance to drop a seed
+    if (random() < SEED_CHANCE) {
+      seeds.push({
+        x: pigeonX,
+        y: pigeonY + 12.5,
+        age: 0,
+        stage: 0
+      });
+      console.log("Pigeon dropped a seed.");
+    }
+  }
+}
+
+function moveToCorner() {
+  let dx = pigeonTargetX - pigeonX;
+  let dy = pigeonTargetY - pigeonY;
+  let d = sqrt(dx * dx + dy * dy);
+  
+  if (d > 5) {
+    pigeonX += (dx / d) * pigeonSpeed;
+    pigeonY += (dy / d) * pigeonSpeed;
+    pigeonDirection = dx > 0 ? 1 : -1;
+    console.log("Pigeon is moving to the corner.");
+  } else {
+    pigeonIsMovingToCorner = false;
+    console.log("Pigeon has reached the corner.");
   }
 }
 
@@ -839,5 +879,27 @@ function handleDialog(character) {
       character.x += (dx / d) * maxSpeed * 0.75;
       character.y += (dy / d) * maxSpeed * 0.75;
     }
+  }
+}
+
+function spawnPigeon() {
+  let side = floor(random(4));
+  switch(side) {
+    case 0: // top
+      pigeonX = random(width);
+      pigeonY = -50;
+      break;
+    case 1: // right
+      pigeonX = width + 50;
+      pigeonY = random(height);
+      break;
+    case 2: // bottom
+      pigeonX = random(width);
+      pigeonY = height + 50;
+      break;
+    case 3: // left
+      pigeonX = -50;
+      pigeonY = random(height);
+      break;
   }
 }
