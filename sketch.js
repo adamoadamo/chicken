@@ -35,7 +35,7 @@ let maxApples = 1;               // Will increase as score goes up
 let pigeonX = -50;
 let pigeonY = -50;
 let pigeonActive = false;
-let pigeonSpeed = 3.75;
+let pigeonSpeed = 1.75;
 let pigeonDirection = 0; // -1 left, 0 center, 1 right
 let currentDialog = null;
 let dialogTimer = 0;
@@ -63,6 +63,14 @@ let pigeonTargetX = 0;
 let pigeonTargetY = 0;
 let titMouseVelocityX = 0;
 let titMouseVelocityY = 0;
+let titMouseWingOffset = 0;
+let titMouseIsHopping = false;
+let titMouseHopHeight = 0;
+let titMouseHopVelocity = 0;
+let pigeonWingOffset = 0;
+let pigeonIsHopping = false;
+let pigeonHopHeight = 0;
+let pigeonHopVelocity = 0;
 
 const DIALOG = {
   pigeon: {
@@ -282,6 +290,20 @@ function draw() {
   // Handle character behaviors
   handlePigeon();
   handleTitMouse();
+  handleBirdHopping({
+    isHopping: titMouseIsHopping,
+    hopHeight: titMouseHopHeight,
+    hopVelocity: titMouseHopVelocity
+  });
+
+  if (pigeonActive) {
+    handlePigeon();
+    handleBirdHopping({
+      isHopping: pigeonIsHopping,
+      hopHeight: pigeonHopHeight,
+      hopVelocity: pigeonHopVelocity
+    });
+  }
 }
 
 function drawDuck(x, y) {
@@ -512,14 +534,17 @@ function drawAppleShadow(x, y) {
 }
 
 function drawPigeon(x, y) {
+  // Apply hop offset to y position
+  y += pigeonHopHeight;
+  
   fill('#808080'); // Gray base color
   
   // Body (same size as duck)
   rect(x - (25 * duckSize), y - (50 * duckSize), 50 * duckSize, 50 * duckSize);
   
-  // Wings (slightly different shape than duck)
-  rect(x - (37.5 * duckSize), y - (43.75 * duckSize), 31.25 * duckSize, 31.25 * duckSize); // Left wing
-  rect(x + (6.25 * duckSize), y - (43.75 * duckSize), 31.25 * duckSize, 31.25 * duckSize); // Right wing
+  // Wings (slightly different shape than duck) with wing offset
+  rect(x - (37.5 * duckSize), y - (43.75 * duckSize) + pigeonWingOffset, 31.25 * duckSize, 31.25 * duckSize); // Left wing
+  rect(x + (6.25 * duckSize), y - (43.75 * duckSize) + pigeonWingOffset, 31.25 * duckSize, 31.25 * duckSize); // Right wing
   
   // Neck (shorter than duck)
   rect(x - (12.5 * duckSize), y - (62.5 * duckSize), 25 * duckSize, 12.5 * duckSize);
@@ -528,7 +553,7 @@ function drawPigeon(x, y) {
   rect(x - (18.75 * duckSize), y - (75 * duckSize), 37.5 * duckSize, 18.75 * duckSize);
   
   // Eye and Beak
-  if (turnDirection <= 0) {  // Looking left or center
+  if (pigeonDirection <= 0) {  // Looking left or center
     // Beak (smaller than duck)
     fill('#000000'); // Black beak
     rect(x - (12.5 * duckSize), y - (68.75 * duckSize), 6.25 * duckSize, 6.25 * duckSize);
@@ -810,14 +835,24 @@ function drawSeed(seed) {
 }
 
 function drawTitMouse(x, y) {
-  fill('#FFD700'); // Yellow base color
+  // Apply hop offset to y position
+  y += titMouseHopHeight;
   
-  // Body (smaller than duck)
+  // Update wing offset only when hopping
+  if (titMouseIsHopping) {
+    titMouseWingOffset = sin(frameCount * 0.5) * 3;
+  } else {
+    titMouseWingOffset = 0;
+  }
+  
+  fill('#FFD700');
+  
+  // Body
   rect(x - (25 * titMouseSize), y - (50 * titMouseSize), 50 * titMouseSize, 50 * titMouseSize);
   
-  // Wings
-  rect(x - (37.5 * titMouseSize), y - (43.75 * titMouseSize), 31.25 * titMouseSize, 31.25 * titMouseSize); // Left wing
-  rect(x + (6.25 * titMouseSize), y - (43.75 * titMouseSize), 31.25 * titMouseSize, 31.25 * titMouseSize); // Right wing
+  // Wings with offset
+  rect(x - (37.5 * titMouseSize), y - (43.75 * titMouseSize) + titMouseWingOffset, 31.25 * titMouseSize, 31.25 * titMouseSize);
+  rect(x + (6.25 * titMouseSize), y - (43.75 * titMouseSize) + titMouseWingOffset, 31.25 * titMouseSize, 31.25 * titMouseSize);
   
   // Head (rounder than duck, and connected to body)
   rect(x - (18.75 * titMouseSize), y - (68.75 * titMouseSize), 37.5 * titMouseSize, 25 * titMouseSize);
@@ -992,6 +1027,25 @@ function handleTitMouse() {
       if (abs(titMouseVelocityX) > 0.1) {
         titMouseDirection = titMouseVelocityX > 0 ? 1 : -1;
       }
+    }
+  }
+}
+
+function handleBirdHopping(bird) {
+  // Randomly initiate a hop
+  if (frameCount % 45 === 0 && random() < 0.4) { // More frequent hopping chance
+    bird.isHopping = true;
+    bird.hopVelocity = -2; // Smaller hop
+  }
+  
+  if (bird.isHopping) {
+    bird.hopHeight += bird.hopVelocity;
+    bird.hopVelocity += 0.2; // Gentler gravity
+    
+    if (bird.hopHeight >= 0) {
+      bird.hopHeight = 0;
+      bird.hopVelocity = 0;
+      bird.isHopping = false;
     }
   }
 }
