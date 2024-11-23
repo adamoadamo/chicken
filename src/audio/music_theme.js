@@ -38,15 +38,15 @@ function initMusicModule() {
   // Initialize Envelopes
   kickEnv = new p5.Envelope();
   kickEnv.setADSR(0.01, 0.4, 0, 0.2);
-  kickEnv.setRange(0.6, 0);
+  kickEnv.setRange(0.15, 0);
 
   snareEnv = new p5.Envelope();
   snareEnv.setADSR(0.001, 0.4, 0, 0.2);
-  snareEnv.setRange(0.4, 0);
+  snareEnv.setRange(0.1, 0);
 
   hatEnv = new p5.Envelope();
   hatEnv.setADSR(0.001, 0.05, 0, 0.05);
-  hatEnv.setRange(0.2, 0);
+  hatEnv.setRange(0.05, 0);
 
   melodyEnv = new p5.Envelope();
   melodyEnv.setADSR(0.01, 0.3, 0.5, 0.5);
@@ -104,13 +104,6 @@ function initMusicModule() {
   reverb.connect(limiter);
   limiter.connect();
 
-  // Initialize Delay for Hi-Hat
-  hatDelay = new p5.Delay();
-  hatDelay.process(hatFilter, 0.2, 0.7, 2300);
-  hatFilter.disconnect();
-  hatFilter.connect(hatDelay);
-  hatDelay.connect();
-  
   // Calculate interval between beats in milliseconds
   beatInterval = (60000 / tempo) / 4; // 16th notes
 
