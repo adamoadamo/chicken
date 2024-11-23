@@ -120,6 +120,12 @@ function setup() {
   noSmooth();
   noStroke();
   frameRate(30);
+  
+  // Initialize audio context with user interaction
+  userStartAudio().then(() => {
+    // Start the music when game loads
+    startMusic();
+  });
 
   // Initialize blink and turn intervals
   blinkInterval = random(60, 180);
@@ -202,6 +208,7 @@ function draw() {
   
   if (pigeonActive) {
     characters.push({ x: pigeonX, y: pigeonY, z: pigeonY, type: 'pigeon' });
+    enableKickDrum();  // Start kick drum when pigeon appears
   }
   
   // Sort characters by Y position
@@ -256,7 +263,8 @@ function draw() {
     titMouseActive = true;
     titMouseX = -50;
     titMouseY = random(height);
-    console.log("Titmouse activated.");
+    enableSnareAndHiHat();  // Start snare and hi-hat when titmouse appears
+    console.log("Titmouse activated, snare and hi-hat enabled");
   }
 
   if (titMouseActive && !titMouseHasSpoken) {
@@ -583,8 +591,8 @@ function handlePigeon() {
   // Initial spawn check
   if (score >= 5 && !pigeonActive) {
     pigeonActive = true;
-    spawnPigeon();
-    console.log("Pigeon spawned.");
+    enableKickDrum();  // Start kick drum when pigeon appears
+    console.log("Pigeon activated, kick drum enabled");
   }
 
   if (pigeonActive) {
@@ -1049,3 +1057,4 @@ function handleBirdHopping(bird) {
     }
   }
 }
+

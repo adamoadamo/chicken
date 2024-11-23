@@ -25,6 +25,14 @@ let currentChord = 0;
 // Envelopes for smoother amplitude transitions
 let kickEnv, snareEnv, hatEnv, melodyEnv;
 
+let isPlaying = false;
+
+// Add these to the top of music_theme.js with other state variables
+let kickEnabled = false;
+let snareEnabled = false;
+let hatEnabled = false;
+let melodyEnabled = true;
+
 // Function to initialize the music module
 function initMusicModule() {
   // Initialize Envelopes
@@ -111,20 +119,19 @@ function initMusicModule() {
 }
 
 function playBeat() {
-  // Define the pattern for kick, snare, and hi-hat
-  if (currentStep === 0 || currentStep === 10) {
+  if (kickEnabled && (currentStep === 0 || currentStep === 10)) {
     playKick();
   }
 
-  if (currentStep === 4 || currentStep === 12) {
+  if (snareEnabled && (currentStep === 4 || currentStep === 12)) {
     playSnare();
   }
 
-  if (currentStep % 4 !== 0) {
+  if (hatEnabled && (currentStep % 4 !== 0)) {
     playHat();
   }
 
-  if (currentStep % 8 === 0) {
+  if (melodyEnabled && (currentStep % 8 === 0)) {
     playMelody();
   }
 
@@ -176,4 +183,54 @@ function midiToFreq(m) {
   return 440 * Math.pow(2, (m - 69) / 12);
 }
 
-// You can call initMusicModule() when you want to start the music
+function startMusic() {
+  if (!isPlaying) {
+    initMusicModule();
+    isPlaying = true;
+  }
+}
+
+function stopMusic() {
+  if (isPlaying) {
+    // Stop all sound sources
+    kick.stop();
+    snare.stop();
+    hat.stop();
+    melodyOsc.stop();
+    isPlaying = false;
+  }
+}
+
+function toggleMusic() {
+  if (isPlaying) {
+    stopMusic();
+  } else {
+    startMusic();
+  }
+}
+
+// Add these trigger functions
+function enableHiHat() {
+  hatEnabled = true;
+}
+
+function enableMelody() {
+  melodyEnabled = true;
+}
+
+// Add these new trigger functions (after line 212)
+function enableKickDrum() {
+  kickEnabled = true;
+}
+
+function enableSnareAndHiHat() {
+  snareEnabled = true;
+  hatEnabled = true;
+}
+
+// Export functions for use in sketch.js
+window.startMusic = startMusic;
+window.stopMusic = stopMusic;
+window.toggleMusic = toggleMusic;
+window.enableKickDrum = enableKickDrum;
+window.enableSnareAndHiHat = enableSnareAndHiHat;
