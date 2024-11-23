@@ -61,6 +61,8 @@ let pigeonFollowing = false;
 let pigeonIsMovingToCorner = false;
 let pigeonTargetX = 0;
 let pigeonTargetY = 0;
+let titMouseVelocityX = 0;
+let titMouseVelocityY = 0;
 
 const DIALOG = {
   pigeon: {
@@ -239,21 +241,6 @@ function draw() {
     console.log("Score >= 5, pigeonActive:", pigeonActive);
   }
 
-  // Update tit mouse position to follow duck
-  let dx = duckX - titMouseX;
-  let dy = duckY - titMouseY;
-  let distance = dist(duckX, duckY, titMouseX, titMouseY);
-
-  if (distance > 100) { // Start following if too far
-    titMouseX += (dx / distance) * maxSpeed * 0.8; // Slightly slower than duck
-    titMouseY += (dy / distance) * maxSpeed * 0.8;
-
-    // Update direction based on movement
-    if (dx !== 0) {
-      titMouseDirection = dx > 0 ? 1 : -1;
-    }
-  }
-
   // Update tit mouse behavior
   let sproutingSeeds = countSproutingSeeds();
 
@@ -291,6 +278,10 @@ function draw() {
       console.log("Pigeon is near the duck and ready to dialog.");
     }
   }
+
+  // Handle character behaviors
+  handlePigeon();
+  handleTitMouse();
 }
 
 function drawDuck(x, y) {
@@ -901,5 +892,106 @@ function spawnPigeon() {
       pigeonX = -50;
       pigeonY = random(height);
       break;
+  }
+}
+
+function drawDialog() {
+  if (currentDialog) {
+    // Draw the current dialog message
+    fill(0);
+    textFont(historyFont);
+    textSize(50);
+    text(currentDialog[0], 50, height - 150);
+    
+    // Draw choices if we're in the choices state
+    if (dialogState.current === 'choices' && dialogChoices.length > 0) {
+      for (let i = 0; i < dialogChoices.length; i++) {
+        if (i === selectedChoice) {
+          fill('#FFD700'); // Highlight selected choice
+        } else {
+          fill(0);
+        }
+        text(dialogChoices[i], 50, height - 100 + (i * 30));
+      }
+    }
+  }
+}
+
+function findNearestSprout() {
+  let nearestSprout = null;
+  let nearestDist = Infinity;
+  
+  for (let seed of seeds) {
+    if (seed.stage > 0) { // Only target sprouted seeds
+      let d = dist(titMouseX, titMouseY, seed.x, seed.y);
+      if (d < nearestDist) {
+        nearestDist = d;
+        nearestSprout = seed;
+      }
+    }
+  }
+  return nearestSprout;
+}
+
+function handleTitMouse() {
+  if (titMouseActive) {
+    if (!titMouseHasSpoken) {
+      // Move towards duck for initial conversation
+      let dx = duckX - titMouseX;
+      let dy = duckY - titMouseY;
+      let d = sqrt(dx * dx + dy * dy);
+      
+      if (d > 75) {
+        titMouseX += (dx / d) * pigeonSpeed;
+        titMouseY += (dy / d) * pigeonSpeed;
+        titMouseDirection = dx > 0 ? 1 : -1;
+      }
+    } else {
+      // Find and eat sprouts
+      let nearestSprout = findNearestSprout();
+      if (nearestSprout) {
+        let dx = nearestSprout.x - titMouseX;
+        let dy = nearestSprout.y - titMouseY;
+        let d = sqrt(dx * dx + dy * dy);
+        
+        if (d > 30) {
+          // Move towards sprout
+          titMouseVelocityX += (dx / d) * 0.5;
+          titMouseVelocityY += (dy / d) * 0.5;
+        } else {
+          // Eat the sprout
+          seeds = seeds.filter(s => s !== nearestSprout);
+          score++;
+        }
+      } else {
+        // Wander randomly when no sprouts are available
+        if (frameCount % 30 === 0) { // Change direction every second
+          titMouseVelocityX += random(-0.5, 0.5);
+          titMouseVelocityY += random(-0.5, 0.5);
+        }
+      }
+      
+      // Apply friction
+      titMouseVelocityX *= 0.95;
+      titMouseVelocityY *= 0.95;
+      
+      // Limit speed
+      let maxTitMouseSpeed = 2; // Slower wandering speed
+      titMouseVelocityX = constrain(titMouseVelocityX, -maxTitMouseSpeed, maxTitMouseSpeed);
+      titMouseVelocityY = constrain(titMouseVelocityY, -maxTitMouseSpeed, maxTitMouseSpeed);
+      
+      // Update position
+      titMouseX += titMouseVelocityX;
+      titMouseY += titMouseVelocityY;
+      
+      // Keep within bounds
+      titMouseX = constrain(titMouseX, 50, width - 50);
+      titMouseY = constrain(titMouseY, 50, height - 50);
+      
+      // Update direction for animation
+      if (abs(titMouseVelocityX) > 0.1) {
+        titMouseDirection = titMouseVelocityX > 0 ? 1 : -1;
+      }
+    }
   }
 }
