@@ -154,7 +154,7 @@ function playMelody() {
     melodyIndex = (melodyIndex + 1) % melodyNotes.length;
   }
 
-  let freq = midiToFreq(note);
+  let freq = convertMidiToFreq(note);
 
   melodyOsc.freq(freq);
   melodyEnv.play(melodyOsc);
@@ -172,7 +172,7 @@ function playMelody() {
 }
 
 // Utility function to convert MIDI note to frequency
-function midiToFreq(m) {
+function convertMidiToFreq(m) {
   return 440 * Math.pow(2, (m - 69) / 12);
 }
 

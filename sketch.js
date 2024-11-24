@@ -71,6 +71,8 @@ let pigeonWingOffset = 0;
 let pigeonIsHopping = false;
 let pigeonHopHeight = 0;
 let pigeonHopVelocity = 0;
+let audioStarted = false;
+let ducksSound;
 
 const DIALOG = {
   pigeon: {
@@ -113,6 +115,8 @@ const DIALOG = {
 
 function preload() {
   historyFont = loadFont('m3x6.ttf');
+  soundFormats('mp3');
+  ducksSound = loadSound('./src/audio/sfx-ducks-ambient.mp3');
 }
 
 function setup() {
@@ -121,10 +125,13 @@ function setup() {
   noStroke();
   frameRate(30);
   
-  // Initialize audio context with user interaction
-  userStartAudio().then(() => {
-    // Start the music when game loads
+  // Start audio immediately
+  getAudioContext().resume().then(() => {
     startMusic();
+    if (ducksSound && ducksSound.isLoaded()) {
+      initDucksSound(ducksSound);
+      startDucksSound(ducksSound);
+    }
   });
 
   // Initialize blink and turn intervals
@@ -140,6 +147,17 @@ function setup() {
 
 function draw() {
   background('#3CB371');
+  
+  if (!audioStarted) {
+    // Draw click to start overlay
+    fill(0, 0, 0, 127);
+    rect(0, 0, width, height);
+    fill(255);
+    textAlign(CENTER, CENTER);
+    textSize(32);
+    text('Click anywhere to start', width/2, height/2);
+    return;
+  }
   
   // Handle movement
   if (playerCanMove) {
@@ -1055,5 +1073,18 @@ function handleBirdHopping(bird) {
       bird.hopVelocity = 0;
       bird.isHopping = false;
     }
+  }
+}
+
+function mousePressed() {
+  if (!audioStarted) {
+    audioStarted = true;
+    getAudioContext().resume().then(() => {
+      startMusic();
+      if (ducksSound && ducksSound.isLoaded()) {
+        initDucksSound(ducksSound);
+        startDucksSound(ducksSound);
+      }
+    });
   }
 }
